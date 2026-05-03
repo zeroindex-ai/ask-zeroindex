@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZeroIndex</title>
+  <meta name="description" content="ZeroIndex — production applications built on Claude. AI-accelerated development, AI-first SDLC adoption, document intelligence, and data platforms — by a senior engineer with 21 years of shipping. Founder-led, industry-agnostic." />
+  <link rel="canonical" href="https://zeroindex.ai/" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+
+  <!-- Open Graph / LinkedIn / Slack / Teams -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://zeroindex.ai/" />
+  <meta property="og:title" content="ZeroIndex — production applications built on Claude" />
+  <meta property="og:description" content="AI-native software consultancy. Founder-led. Reviewable code, real evals, real observability — not pilot decks." />
+  <meta property="og:image" content="https://zeroindex.ai/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ZeroIndex — production applications built on Claude" />
+  <meta name="twitter:description" content="AI-native software consultancy. Founder-led. Reviewable code, real evals, real observability — not pilot decks." />
+  <meta name="twitter:image" content="https://zeroindex.ai/og-image.png" />
+
+  <!-- Structured data (Schema.org / JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "ZeroIndex",
+    "legalName": "ZeroIndex LLC",
+    "url": "https://zeroindex.ai",
+    "logo": "https://zeroindex.ai/favicon.svg",
+    "image": "https://zeroindex.ai/og-image.png",
+    "description": "AI-native software consultancy. Production applications built on Claude — reviewable code, real evals, real observability.",
+    "founder": {
+      "@type": "Person",
+      "name": "Abhishek Bhandari",
+      "jobTitle": "Founder",
+      "sameAs": "https://www.linkedin.com/in/abhishek-bhandari/"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "PA",
+      "addressCountry": "US"
+    },
+    "areaServed": "US",
+    "knowsAbout": [
+      "AI Software Development",
+      "Claude",
+      "Anthropic SDK",
+      "AI-first SDLC",
+      "Document Intelligence",
+      "Retrieval-Augmented Generation",
+      "Agentic Systems",
+      "Production AI"
+    ],
+    "email": "hello@zeroindex.ai",
+    "sameAs": [
+      "https://www.linkedin.com/in/abhishek-bhandari/"
+    ]
+  }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --bg-soft: #111114;
+      --ink: #f5f5f4;
+      --muted: #a1a1aa;
+      --muted-2: #8b8d96;
+      --line: #27272a;
+      --line-strong: #3f3f46;
+      --accent-1: #a78bfa;  /* violet */
+      --accent-2: #60a5fa;  /* sky */
+      --accent-3: #f0abfc;  /* fuchsia */
+      --accent-go: #34d399; /* green */
+    }
+    html { scroll-behavior: smooth; }
+    html, body { background: var(--bg); color: var(--ink); }
+    body { font-family: 'Inter', system-ui, sans-serif; font-feature-settings: 'ss01', 'cv11'; -webkit-font-smoothing: antialiased; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .muted { color: var(--muted); }
+    .muted-2 { color: var(--muted-2); }
+    .line { border-color: var(--line); }
+    .label {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted-2);
+    }
+    .num { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--muted-2); }
+
+    /* gradient text on hero */
+    .grad-text {
+      background: linear-gradient(110deg, var(--accent-3) 0%, var(--accent-1) 35%, var(--accent-2) 75%, #ffffff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shift 14s ease-in-out infinite;
+    }
+    /* static gradient for stat numbers (no animation — avoids 4-stat motion noise) */
+    .grad-text-static {
+      background: linear-gradient(110deg, var(--accent-3) 0%, var(--accent-1) 50%, var(--accent-2) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    @keyframes shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* hero glows */
+    .glow { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .glow::before, .glow::after {
+      content: ""; position: absolute; border-radius: 9999px; filter: blur(120px);
+    }
+    .glow::before {
+      width: 560px; height: 560px; left: -140px; top: -180px;
+      background: var(--accent-1); opacity: 0.32;
+    }
+    .glow::after {
+      width: 480px; height: 480px; right: -140px; top: 60px;
+      background: var(--accent-2); opacity: 0.22;
+    }
+
+    /* cards */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.02) 100%);
+    }
+
+    /* small pills */
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--line); border-radius: 9999px;
+      padding: 4px 10px; font-size: 11px; color: var(--muted);
+    }
+
+    /* buttons */
+    .btn-primary {
+      background: linear-gradient(120deg, #ffffff 0%, #d4d4d8 100%);
+      color: #09090b; border-radius: 9999px;
+      transition: transform .15s ease, box-shadow .25s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 40px -12px rgba(167,139,250,0.55);
+    }
+    .btn-ghost { border: 1px solid var(--line); border-radius: 9999px; transition: border-color .2s ease, color .2s ease; }
+    .btn-ghost:hover { border-color: var(--line-strong); color: #fff; }
+
+    a { transition: color .15s ease, opacity .15s ease; }
+    a.subtle:hover { color: #fff; }
+
+    /* back to top */
+    .back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity .25s ease, transform .25s ease, visibility .25s, border-color .2s ease, box-shadow .25s ease;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .back-to-top:hover {
+      border-color: var(--line-strong);
+      box-shadow: 0 8px 32px -8px rgba(167, 139, 250, 0.55);
+    }
+    .back-to-top:focus-visible {
+      outline: 2px solid var(--accent-1);
+      outline-offset: 4px;
+    }
+
+    /* mobile menu toggle */
+    .menu-toggle {
+      position: relative;
+      z-index: 120;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink);
+      transition: border-color .15s ease;
+    }
+    .menu-toggle:hover { border-color: var(--line-strong); }
+    .menu-toggle .icon-x { display: none; }
+    .menu-toggle[aria-expanded="true"] .icon-bars { display: none; }
+    .menu-toggle[aria-expanded="true"] .icon-x { display: block; }
+    .menu-toggle:focus-visible {
+      outline: 2px solid var(--accent-1);
+      outline-offset: 2px;
+    }
+
+    /* mobile menu overlay */
+    .mobile-menu {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      padding: 96px 28px 48px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px);
+      transition: opacity .3s ease, transform .3s ease, visibility .3s;
+      overflow-y: auto;
+    }
+    .mobile-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .mobile-menu nav {
+      display: flex;
+      flex-direction: column;
+    }
+    .mobile-menu nav a {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+      letter-spacing: -0.02em;
+      transition: color .15s ease;
+    }
+    .mobile-menu nav a:last-child { border-bottom: none; }
+    .mobile-menu nav a:hover { color: var(--accent-1); }
+    .mobile-menu-cta {
+      margin-top: 32px;
+      padding: 14px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      align-self: flex-start;
+      background: linear-gradient(120deg, #ffffff 0%, #d4d4d8 100%);
+      color: #09090b;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* skip to content */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 8px;
+      background: var(--ink);
+      color: var(--bg);
+      padding: 12px 16px;
+      z-index: 1000;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 0 0 8px 8px;
+      transition: top .2s ease;
+    }
+    .skip-link:focus {
+      top: 0;
+      outline: 2px solid var(--accent-1);
+      outline-offset: 2px;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-bottom: 1px solid var(--line);
+      padding: 22px 0;
+    }
+    .faq-item summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--ink);
+      transition: color 0.15s ease;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "+";
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color .15s ease;
+    }
+    .faq-item[open] summary::after { content: "−"; color: var(--accent-1); }
+    .faq-item summary:hover { color: #fff; }
+    .faq-answer {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+      max-width: 56rem;
+    }
+
+    /* logo mark with glow */
+    .logo-mark {
+      filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.45));
+    }
+    .logo-mark .zero-glyph {
+      background: linear-gradient(110deg, var(--accent-3) 0%, var(--accent-1) 35%, var(--accent-2) 75%, #ffffff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: shift 14s ease-in-out infinite;
+    }
+
+    .dot {
+      width: 6px; height: 6px; border-radius: 9999px;
+      background: var(--accent-go);
+      box-shadow: 0 0 16px var(--accent-go);
+      display: inline-block;
+    }
+
+    /* divider gradient */
+    .grad-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--line-strong) 25%, var(--line-strong) 75%, transparent 100%);
+    }
+
+    /* portrait */
+    .portrait-wrap { position: relative; }
+    .portrait-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -28px;
+      background: radial-gradient(60% 50% at 30% 20%, rgba(167,139,250,0.32), transparent 70%);
+      filter: blur(36px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .portrait {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      object-position: center 18%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav aria-label="Mobile navigation">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#use-cases">Use cases</a>
+      <a href="#principles">Principles</a>
+      <a href="#stack">Stack</a>
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="mobile-menu-cta">
+      Start a project
+      <span aria-hidden="true">&rarr;</span>
+    </a>
+  </div>
+
+  <div class="relative">
+    <div class="glow"></div>
+
+    <div class="max-w-6xl mx-auto px-6 md:px-10 relative">
+
+      <!-- header -->
+      <header class="flex items-center justify-between py-7">
+        <div class="flex items-center gap-3">
+          <a href="#" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="ZeroIndex home">
+            <span class="logo-mark mono text-xl font-bold tracking-tight">
+              <span class="muted">[</span><span class="zero-glyph">0</span><span class="muted">]</span>
+            </span>
+            <span class="text-base font-bold tracking-tight">ZeroIndex</span>
+          </a>
+        </div>
+        <nav class="hidden md:flex gap-8 text-sm muted">
+          <a class="subtle" href="#services">Services</a>
+          <a class="subtle" href="#process">Process</a>
+          <a class="subtle" href="#use-cases">Use cases</a>
+          <a class="subtle" href="#principles">Principles</a>
+          <a class="subtle" href="#stack">Stack</a>
+          <a class="subtle" href="#about">About</a>
+          <a class="subtle" href="#faq">FAQ</a>
+          <a class="subtle" href="#contact">Contact</a>
+        </nav>
+        <a href="#contact" class="btn-primary hidden md:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium">
+          Start a project
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+        <button type="button" class="menu-toggle md:hidden" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileMenu">
+          <svg class="icon-bars" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+          <svg class="icon-x" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="6" y1="18" x2="18" y2="6"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- hero -->
+      <section id="main-content" class="pt-24 md:pt-36 pb-32">
+        <div class="flex items-center gap-3 mb-8">
+          <span class="dot"></span>
+          <span class="label">Founder-led</span>
+        </div>
+
+        <h1 class="text-5xl md:text-7xl lg:text-[88px] font-extrabold tracking-tight leading-[0.98] max-w-5xl">
+          Production AI,
+          <br />
+          <span class="grad-text">built on Claude.</span>
+        </h1>
+
+        <p class="mt-8 text-lg md:text-xl muted max-w-2xl leading-relaxed">
+          ZeroIndex is an AI-native software consultancy. Production applications built on Claude &mdash; reviewable code, real evals, real observability. Not pilot decks.
+        </p>
+
+        <div class="mt-10 flex flex-wrap items-center gap-3">
+          <a href="#contact" class="btn-primary inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold">
+            Start a conversation
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <a href="#services" class="btn-ghost inline-flex items-center gap-2 px-5 py-3 text-sm muted">
+            See services
+          </a>
+        </div>
+
+        <div class="mt-16 flex flex-wrap gap-2">
+          <span class="pill mono">Claude</span>
+          <span class="pill mono">Evals</span>
+          <span class="pill mono">Production</span>
+          <span class="pill mono">AI-first SDLC</span>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- track record -->
+      <section id="track-record" class="pt-24 pb-32">
+        <div class="label mb-10">Track record</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          <div>
+            <div class="text-4xl md:text-5xl font-bold tracking-tight"><span class="grad-text-static">90%</span><span class="muted text-2xl ml-1">&darr;</span></div>
+            <div class="muted text-sm mt-3 leading-relaxed">Release cycle reduction</div>
+          </div>
+          <div>
+            <div class="text-4xl md:text-5xl font-bold tracking-tight"><span class="grad-text-static">99%</span><span class="muted text-2xl ml-1">&uarr;</span></div>
+            <div class="muted text-sm mt-3 leading-relaxed">Deployment reliability</div>
+          </div>
+          <div>
+            <div class="text-4xl md:text-5xl font-bold tracking-tight"><span class="grad-text-static">10M</span><span class="muted text-2xl ml-1">+</span></div>
+            <div class="muted text-sm mt-3 leading-relaxed">Records processed daily</div>
+          </div>
+          <div>
+            <div class="text-4xl md:text-5xl font-bold tracking-tight"><span class="grad-text-static">100</span><span class="muted text-2xl ml-1">+</span></div>
+            <div class="muted text-sm mt-3 leading-relaxed">Data feeds shipped</div>
+          </div>
+        </div>
+        <p class="muted-2 text-xs mt-10 mono">Career-to-date metrics from prior engineering leadership roles.</p>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- services -->
+      <section id="services" class="pt-24 pb-32">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <div class="label mb-3">Services</div>
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Three ways to engage.</h2>
+          </div>
+          <div class="hidden md:block num text-sm">00 &mdash; 02</div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5">
+          <article class="card p-7">
+            <div class="num text-xs mb-6">00 / Audit</div>
+            <h3 class="text-xl font-semibold tracking-tight">AI Integration Audit</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              A 2&ndash;3 week, fixed-fee assessment of where Claude and adjacent AI tools fit your stack. You leave with a prioritized roadmap and an opinionated build-or-buy call &mdash; not a sales deck.
+            </p>
+            <div class="mt-6 flex flex-wrap items-center gap-2">
+              <span class="pill mono">2&ndash;3 weeks</span>
+              <span class="pill mono">Fixed fee</span>
+            </div>
+          </article>
+
+          <article class="card p-7">
+            <div class="num text-xs mb-6">01 / Build</div>
+            <h3 class="text-xl font-semibold tracking-tight">AI-Accelerated Build</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Production-grade APIs, applications, websites, and data platforms &mdash; built with AI as the velocity multiplier. Senior judgment, reviewable code, real evals. From MVP to multi-quarter engagement.
+            </p>
+            <div class="mt-6 flex flex-wrap items-center gap-2">
+              <span class="pill mono">4 weeks &ndash; 6+ months</span>
+              <span class="pill mono">Milestone-based</span>
+            </div>
+          </article>
+
+          <article class="card p-7">
+            <div class="num text-xs mb-6">02 / Transform</div>
+            <h3 class="text-xl font-semibold tracking-tight">AI for Engineering Teams</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Hands-on transformation for engineering organizations adopting AI in their SDLC. Code generation workflows, automated PR and work item creation, eval discipline, team practice &mdash; measurable velocity gains.
+            </p>
+            <div class="mt-6 flex flex-wrap items-center gap-2">
+              <span class="pill mono">3+ months</span>
+              <span class="pill mono">Retainer</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- process -->
+      <section id="process" class="pt-24 pb-32">
+        <div class="mb-12">
+          <div class="label mb-3">Process</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">How an engagement works.</h2>
+          <p class="mt-4 muted leading-relaxed max-w-3xl">
+            Four steps from first email to clean hand-off. No surprises, no lock-in.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-10 md:gap-8">
+          <div>
+            <div class="num text-xs mb-4">00 / Discover</div>
+            <h3 class="text-lg font-semibold tracking-tight">Talk it through.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              A 30-minute call. You describe the problem and constraints. I tell you whether ZeroIndex is the right fit &mdash; and if not, where to look instead.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">01 / Scope</div>
+            <h3 class="text-lg font-semibold tracking-tight">Scope it.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              A fixed-fee SOW with milestones, deliverables, IP terms, and clear exit conditions &mdash; written before any code is.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">02 / Build</div>
+            <h3 class="text-lg font-semibold tracking-tight">Ship it.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Continuous delivery. Every merged PR ships to production. Evals catch regressions. You see progress as it happens &mdash; not at the end.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">03 / Hand off</div>
+            <h3 class="text-lg font-semibold tracking-tight">Hand it off.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Documentation, runbooks, an on-call playbook, and a working session with your team. Code that outlasts the engagement stays with someone who can change it.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- use cases -->
+      <section id="use-cases" class="pt-24 pb-32">
+        <div class="mb-12">
+          <div class="label mb-3">Use cases</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">Where AI fits.</h2>
+          <p class="mt-4 muted leading-relaxed max-w-5xl">
+            The kinds of problems Claude and adjacent models solve well &mdash; and where ZeroIndex tends to operate.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-10 md:gap-12">
+          <div>
+            <div class="num text-xs mb-4">00 / SDLC</div>
+            <h3 class="text-lg font-semibold tracking-tight">AI for engineering teams</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Establishing AI-first SDLC at the org level &mdash; code generation, automated PR creation, AI-augmented test and release workflows. Track record of absorbing major workload growth without proportional headcount increases.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">01 / Velocity</div>
+            <h3 class="text-lg font-semibold tracking-tight">AI-accelerated development</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Building APIs, applications, and websites with AI as the productivity multiplier. Daily Claude Code use for production code, PR generation, work items, and architecture documentation &mdash; senior judgment at AI velocity, not vibe coding.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">02 / Apps</div>
+            <h3 class="text-lg font-semibold tracking-tight">AI in your applications</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Embedding Claude and adjacent LLMs into user-facing products &mdash; production-grade integration, not chat widgets glued on top.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">03 / Data</div>
+            <h3 class="text-lg font-semibold tracking-tight">Data platforms + AI</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Building data platforms that move at scale &mdash; pipelines, warehouses, lakes &mdash; with LLM-powered insights, natural-language interfaces, and semantic retrieval on top.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">04 / Docs</div>
+            <h3 class="text-lg font-semibold tracking-tight">Document intelligence</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Extract structured data from contracts, invoices, forms, and other unstructured documents.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">05 / Workflow</div>
+            <h3 class="text-lg font-semibold tracking-tight">Workflow automation</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Classification, triage, summarization, and routing &mdash; the rules-based work that LLMs do better.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- principles -->
+      <section id="principles" class="pt-24 pb-32">
+        <div class="mb-12">
+          <div class="label mb-3">How I work</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-5xl">
+            Three principles that decide whether something ships.
+          </h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-10 md:gap-12">
+          <div>
+            <div class="num text-xs mb-4">00 / Code</div>
+            <h3 class="text-lg font-semibold tracking-tight">Ship reviewable code.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Model output is an input, not a product. Code that ships is read, reviewed, and tested &mdash; like any team that takes itself seriously.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">01 / Production</div>
+            <h3 class="text-lg font-semibold tracking-tight">Production over pilots.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Continuous delivery, real evals, observability &mdash; not a slide deck and a Loom video. The work isn&rsquo;t done until on-call knows what to do at 3am.
+            </p>
+          </div>
+          <div>
+            <div class="num text-xs mb-4">02 / Truth</div>
+            <h3 class="text-lg font-semibold tracking-tight">Tell the truth about AI.</h3>
+            <p class="mt-3 muted leading-relaxed text-sm">
+              Including when it&rsquo;s not the right tool. Selling an LLM to solve a deterministic problem is the fastest way to lose a client&rsquo;s trust.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- stack -->
+      <section id="stack" class="pt-24 pb-32">
+        <div class="mb-12">
+          <div class="label mb-3">Stack</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">The toolbox.</h2>
+          <p class="mt-4 muted leading-relaxed max-w-5xl">
+            Production stack from 21 years of shipping. Claude-first on AI &mdash; deliberate concentration, expanding with each engagement.
+          </p>
+        </div>
+
+        <div class="space-y-5">
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">AI / LLMs</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">Claude</span>
+              <span class="pill mono">Azure OpenAI</span>
+              <span class="pill mono">Azure AI Foundry</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">Languages</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">C#</span>
+              <span class="pill mono">TypeScript</span>
+              <span class="pill mono">Python</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">Backend</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">ASP.NET</span>
+              <span class="pill mono">Node.js</span>
+              <span class="pill mono">FastAPI</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">Frontend</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">Angular</span>
+              <span class="pill mono">React</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">Architecture</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">Microservices</span>
+              <span class="pill mono">Event-driven</span>
+              <span class="pill mono">REST APIs</span>
+              <span class="pill mono">GraphQL</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">Data &amp; Cloud</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">Postgres</span>
+              <span class="pill mono">Cosmos DB</span>
+              <span class="pill mono">Redis</span>
+              <span class="pill mono">Elasticsearch</span>
+              <span class="pill mono">Databricks</span>
+              <span class="pill mono">Azure</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-12 gap-3 md:gap-6 items-baseline">
+            <div class="md:col-span-3 label">DevOps &amp; Tooling</div>
+            <div class="md:col-span-9 flex flex-wrap gap-2">
+              <span class="pill mono">Docker</span>
+              <span class="pill mono">Kubernetes</span>
+              <span class="pill mono">GitHub Actions</span>
+              <span class="pill mono">Claude Code</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- about -->
+      <section id="about" class="pt-24 pb-32">
+        <div class="grid md:grid-cols-12 gap-10 md:gap-14 items-start">
+          <div class="md:col-span-4">
+            <div class="portrait-wrap">
+              <img src="abhishek-pic.JPEG" alt="Abhishek Bhandari" class="portrait" />
+            </div>
+            <div class="mt-6">
+              <div class="font-semibold tracking-tight text-lg">Abhishek Bhandari</div>
+              <div class="muted text-sm">Founder &middot; Senior engineer &middot; Engineering leader</div>
+            </div>
+          </div>
+          <div class="md:col-span-7 md:col-start-6">
+            <div class="label mb-3">About</div>
+            <h2 class="text-3xl md:text-4xl font-bold tracking-tight">
+              Founder-led. <br /><span class="muted">No agencies, no pass-throughs.</span>
+            </h2>
+            <p class="mt-8 text-lg leading-relaxed">
+              Senior engineer and engineering leader with <span class="font-semibold">21 years</span> of experience building APIs, applications, websites, and enterprise systems &mdash; currently pioneering AI-first SDLC adoption at organization scale.
+            </p>
+            <p class="mt-5 muted leading-relaxed">
+              ZeroIndex applies that delivery discipline &mdash; reviewable code, real evals, honest tradeoffs &mdash; to AI-native engagements. The senior engineer your contract names is the one writing the code, and the one on-call when it breaks.
+            </p>
+            <p class="mt-5 muted leading-relaxed">
+              Twenty-one years in, and I&rsquo;m still curious about what comes next.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- faq -->
+      <section id="faq" class="pt-24 pb-32">
+        <div class="mb-12">
+          <div class="label mb-3">FAQ</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">Things you'd ask anyway.</h2>
+        </div>
+
+        <div class="max-w-4xl">
+          <details class="faq-item">
+            <summary>How does pricing work?</summary>
+            <div class="faq-answer">
+              Fixed-fee per engagement, set in the SOW before any work starts. Audits are flat-rate. Builds are milestone-based with the fee defined per milestone. No hourly billing surprises, no scope creep without explicit re-scoping.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Do you use AI to write the code?</summary>
+            <div class="faq-answer">
+              Yes &mdash; heavily. Claude Code is in my hands daily for production code, PR generation, work items, and architecture documentation. But every line that ships is reviewed and tested by a senior engineer (me). Reviewable code, not vibe-coded output.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>What if AI isn&rsquo;t the right tool for the problem?</summary>
+            <div class="faq-answer">
+              I&rsquo;ll say so. Selling an LLM to solve a deterministic problem is the fastest way to lose your trust &mdash; and mine. If your problem is better solved by traditional engineering, I&rsquo;ll either scope it that way or point you to someone who can.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Do you only work with Claude?</summary>
+            <div class="faq-answer">
+              Claude-first by design &mdash; that&rsquo;s where I have the deepest experience and where the model lineup is most production-ready. I&rsquo;ve also shipped on Azure OpenAI and Azure AI Foundry. ZeroIndex does not do foundation model R&amp;D.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>What industries do you work with?</summary>
+            <div class="faq-answer">
+              Industry-agnostic. The problems ZeroIndex solves &mdash; document intelligence, AI in applications, workflow automation, data platforms &mdash; apply across verticals.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>Are you a solo consultant or a team?</summary>
+            <div class="faq-answer">
+              Founder-led, single-engineer studio today. The senior engineer named in your contract is the one writing the code &mdash; and the one on-call when it breaks. If ZeroIndex grows, who-does-what is always transparent in the SOW.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <!-- contact -->
+      <!-- BEGIN ask-zeroindex preview (not in production) -->
+      <section id="ask" class="pt-24 pb-24">
+        <div class="max-w-5xl">
+          <div class="label mb-3">Ask</div>
+          <h2 class="text-4xl md:text-5xl font-bold tracking-tight">Ask anything.</h2>
+          <p class="mt-6 muted text-lg leading-relaxed">
+            Skip the FAQ. Ask the actual question and get a grounded answer with sources from this site.
+          </p>
+          <div class="mt-10 rounded-xl overflow-hidden" style="background: #000000;">
+            <div id="ask-scroll" style="max-height: 640px; overflow-y: auto;">
+              <iframe
+                id="ask-iframe"
+                src="http://localhost:3000/embed"
+                class="w-full"
+                style="height: 220px; border: 0; display: block; background: #000000; transition: height 0.2s ease-out;"
+                title="Ask ZeroIndex"
+              ></iframe>
+            </div>
+          </div>
+          <p class="mt-4 text-xs muted">
+            <strong>Preview only:</strong> the widget is iframed from <code>localhost:3000/embed</code>. The iframe sizes itself to content; the surrounding wrapper caps the visible height at 640px and shows a scrollbar only when content exceeds that.
+            Production embed will be served from <code>ask.zeroindex.ai</code> after Vercel deploy (Week 2).
+          </p>
+          <script>
+            (function () {
+              const iframe = document.getElementById('ask-iframe');
+              const MIN = 200;
+              const BUFFER = 8;
+              let lastH = -1;
+              window.addEventListener('message', function (e) {
+                if (!e.data || e.data.type !== 'ask-zeroindex/resize') return;
+                // No max here — iframe sizes to content; the wrapper handles overflow + scroll.
+                const h = Math.max(MIN, Math.ceil(e.data.height) + BUFFER);
+                if (h === lastH) return;
+                lastH = h;
+                iframe.style.height = h + 'px';
+              });
+            })();
+          </script>
+        </div>
+      </section>
+
+      <div class="grad-divider"></div>
+
+      <section id="contact" class="pt-24 pb-24">
+        <div class="max-w-5xl">
+          <div class="label mb-3">Contact</div>
+          <h2 class="text-4xl md:text-5xl font-bold tracking-tight">Have a project in mind?</h2>
+          <p class="mt-6 muted text-lg leading-relaxed">
+            Tell me about the problem and the constraints. If it&rsquo;s a fit, I&rsquo;ll scope the work &mdash; if not, I&rsquo;ll point you elsewhere.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center gap-3">
+            <a href="mailto:hello@zeroindex.ai?subject=Project%20inquiry" target="_blank" rel="noopener" class="btn-primary inline-flex items-center gap-2 px-6 py-3.5 text-sm font-semibold">
+              hello@zeroindex.ai
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+            <button type="button" class="btn-ghost inline-flex items-center gap-2 px-5 py-3.5 text-sm muted" onclick="copyEmail(this)" aria-label="Copy email address">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span class="copy-text">Copy email</span>
+            </button>
+            <span class="muted text-sm">US-based &middot; Eastern Time &middot; Booking new projects</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- footer -->
+      <footer class="border-t line py-10 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-sm muted">
+        <div class="mono">ZeroIndex LLC &middot; Pennsylvania &middot; USA</div>
+        <div class="flex items-center gap-6">
+          <a class="subtle" href="https://www.linkedin.com/in/abhishek-bhandari/" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="subtle" href="mailto:hello@zeroindex.ai?subject=Project%20inquiry" target="_blank" rel="noopener">hello@zeroindex.ai</a>
+          <span class="mono">&copy; 2026</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <button type="button" class="back-to-top" id="backToTop" onclick="scrollToTop()" aria-label="Back to top">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 19V5"/>
+      <path d="M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+  <script>
+    /* mobile menu */
+    (function() {
+      const toggle = document.getElementById('menuToggle');
+      const menu = document.getElementById('mobileMenu');
+      if (!toggle || !menu) return;
+      function setOpen(open) {
+        menu.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        menu.setAttribute('aria-hidden', String(!open));
+        document.body.style.overflow = open ? 'hidden' : '';
+      }
+      toggle.addEventListener('click', () => {
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        setOpen(!isOpen);
+      });
+      menu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => setOpen(false));
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
+    })();
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    (function() {
+      const btn = document.getElementById('backToTop');
+      if (!btn) return;
+      function onScroll() {
+        if (window.scrollY > 400) btn.classList.add('visible');
+        else btn.classList.remove('visible');
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    function copyEmail(btn) {
+      navigator.clipboard.writeText('hello@zeroindex.ai').then(() => {
+        const span = btn.querySelector('.copy-text');
+        const original = span.textContent;
+        span.textContent = 'Copied';
+        setTimeout(() => { span.textContent = original; }, 1500);
+      }).catch(() => {
+        const span = btn.querySelector('.copy-text');
+        span.textContent = 'Copy failed';
+        setTimeout(() => { span.textContent = 'Copy email'; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

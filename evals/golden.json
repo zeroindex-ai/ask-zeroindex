@@ -1,0 +1,14 @@
+[
+  {
+    "id": "services-list",
+    "question": "What services does ZeroIndex offer?",
+    "must_mention": ["AI"],
+    "must_not_mention": []
+  },
+  {
+    "id": "what-is-zeroindex",
+    "question": "What is ZeroIndex?",
+    "must_mention": ["consultancy"],
+    "must_not_mention": []
+  }
+]
