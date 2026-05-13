@@ -8,7 +8,7 @@ import { runMain } from './_run';
 
 const MOCK_CHUNKS: RetrievedChunk[] = Array.from({ length: 5 }, (_, i) => ({
   id: 100 + i,
-  sourcePath: '/Users/Abhishek/Desktop/ZeroIndex/Code/zeroindexai/index.html',
+  sourcePath: 'mock/index.html',
   section: `Section ${i}`,
   content:
     `Filler chunk ${i}: ZeroIndex is a single-person AI consultancy run by Abhishek Bhandari. ` +

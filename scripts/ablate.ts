@@ -10,13 +10,13 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { embedQueries, rerank } from '@/lib/embeddings';
 import { vectorSearch, ftsSearch, hybridCandidates } from '@/lib/retrieval';
-import { recallAtK, p50, p95 } from '../evals/metrics';
+import { recallAtK, p50, p95 } from '@zeroindex-ai/eval-pack';
 import { runMain, sleep, RERANK_THROTTLE_MS, pad } from './_run';
 
 type GoldenItem = {
   id: string;
   question: string;
-  relevant_chunk_ids: number[];
+  relevant_refs: string[];
   must_mention: string[];
   must_not_mention: string[];
 };
@@ -34,7 +34,8 @@ type RunResult = { ids: number[]; latency: number; recall: number };
 
 async function main() {
   const raw = await readFile(join(process.cwd(), 'evals/golden-seed.json'), 'utf-8');
-  const golden: GoldenItem[] = JSON.parse(raw);
+  const goldenSet: { version: '1.0'; items: GoldenItem[] } = JSON.parse(raw);
+  const golden = goldenSet.items;
 
   const grid: Record<ModeName, Record<string, RunResult>> = Object.fromEntries(
     MODE_NAMES.map((m) => [m, {}])
@@ -87,7 +88,11 @@ function record(
   ids: number[],
   latency: number
 ) {
-  grid[mode][item.id] = { ids, latency, recall: recallAtK(ids, item.relevant_chunk_ids) };
+  grid[mode][item.id] = {
+    ids,
+    latency,
+    recall: recallAtK(ids.map(String), item.relevant_refs),
+  };
 }
 
 async function timed<T>(fn: () => Promise<T>): Promise<{ value: T; latency: number }> {
@@ -142,7 +147,8 @@ function printMisses(
   console.log('\n=== Misses on hybrid+rerank top-5 ===\n');
   for (const item of golden) {
     const cell = grid['hybrid+rerank top-5'][item.id];
-    const missed = item.relevant_chunk_ids.filter((id) => !cell.ids.includes(id));
+    const cellIdSet = new Set(cell.ids.map(String));
+    const missed = item.relevant_refs.filter((ref) => !cellIdSet.has(ref));
     if (missed.length > 0) {
       console.log(`  ${item.id}: missed [${missed.join(', ')}] — "${item.question}"`);
     }
