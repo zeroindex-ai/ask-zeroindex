@@ -46,3 +46,6 @@ evals/results/
 
 # local scratchpad — not for public consumption
 NOTES.md
+
+# Claude Code per-user local settings (machine paths, permission rules) — never commit
+.claude/settings.local.json
