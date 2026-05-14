@@ -10,7 +10,7 @@ This document captures the research, strategic decisions, architecture, day-by-d
 1. Onboard future collaborators (or future-you, in a clean session)
 2. Capture the **reasoning** behind stack picks and design choices, not just the choices themselves
 3. Track sprint progress and provide a single source of truth for "what's done / in flight / pending"
-4. Serve as a portfolio artifact — the kind of decision-doc engineering managers expect to read alongside the code
+4. Document the engineering decisions and tradeoffs as a durable complement to the code
 
 ---
 
@@ -24,7 +24,7 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 
 ### Why this project
 
-`ask-zeroindex` makes the zeroindex.ai marketing site interactive: visitors can ask about services, pricing, principles, or background and get answers grounded in the site's own content rather than hunting through sections. It also exercises the production-grade RAG stack ZeroIndex builds for clients — embeddings, hybrid retrieval, reranking, streaming, eval-driven prompt development — making the site itself the first reference implementation. The widget doubles as an honest stress test of the site copy: if Claude can't answer *"what's your pricing?"* from the page, the page doesn't either.
+`ask-zeroindex` makes the zeroindex.ai site interactive: visitors can ask about services, pricing, principles, or background and get answers grounded in the site's own content rather than hunting through sections. It also exercises a full production RAG stack end-to-end — embeddings, hybrid retrieval, reranking, streaming, eval-driven prompt development. The widget doubles as an honest stress test of the site copy: if Claude can't answer *"what's your pricing?"* from the page, the page doesn't either.
 
 ### Goals & success criteria
 
