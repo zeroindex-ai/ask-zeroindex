@@ -1,15 +1,12 @@
 # ask-zeroindex — Project Documentation
 
-> Last updated: 2026-05-07
-> Author: Abhishek Bhandari, with iterative collaboration via Claude Code
->
-> **Status: Steps 1-7 complete** — RAG pipeline + widget shipped; retrieval ablation locked in hybrid+rerank top-5 (85.3% Recall@K); LLM-as-judge eval harness running across 30 hand-labeled queries with **90% pass rate** (up from 73% baseline after system prompt iteration). Prompt caching investigated and **intentionally disabled** — `cache_control` triggered an asymmetric write-without-read pattern that net-cost 25% more than no caching at our scale (full notes in `eval-baselines.md` §6). Shipped to production at `ask.zeroindex.ai`, embedded on `zeroindex.ai` between FAQ and Contact.
+> **Status: shipped** — live at `ask.zeroindex.ai`, embedded on `zeroindex.ai`. RAG pipeline + widget + LLM-as-judge eval harness; 90% pass rate on the 30-query golden set. Detailed retrieval ablation and the prompt-caching decision are in `eval-baselines.md`.
 
-This document captures the research, strategic decisions, architecture, day-by-day implementation, testing approach, and integration plan for `ask-zeroindex`. It exists to:
+This document captures the research, strategic decisions, architecture, implementation, testing approach, and integration plan for `ask-zeroindex`. It exists to:
 
 1. Onboard future collaborators (or future-you, in a clean session)
 2. Capture the **reasoning** behind stack picks and design choices, not just the choices themselves
-3. Track sprint progress and provide a single source of truth for "what's done / in flight / pending"
+3. Provide a single source of truth for "what's done, in flight, and pending"
 4. Document the engineering decisions and tradeoffs as a durable complement to the code
 
 ---
@@ -33,9 +30,7 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 | RAG pipeline working end-to-end | Single test query returns grounded answer with citations | ✅ (2026-05-05) |
 | 30 golden Q/A baseline | ≥ 80% pass rate on LLM-as-judge | ✅ 90% baseline locked in `eval-baselines.md` |
 | First-token latency | p50 < 2s, p95 < 4s | ⏳ open — current 3.8s |
-| Widget live on `zeroindex.ai` | Visitors can ask + get answers | ✅ shipped at `ask.zeroindex.ai`, embedded on marketing site |
-| Public GitHub repo with strong README | Stars not the goal; technical credibility is | ✅ |
-| Public launch post | Eval methodology + numbers | ⏳ open |
+| Widget live on `zeroindex.ai` | Visitors can ask + get answers | ✅ shipped at `ask.zeroindex.ai`, embedded on the site |
 
 ### Out of scope (v1)
 
