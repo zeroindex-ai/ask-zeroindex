@@ -62,3 +62,48 @@ jobs:
           name: eval-results-${{ github.run_id }}
           path: evals/results/
           retention-days: 30
+
+      - name: Publish to evals-site
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        env:
+          EVALS_SITE_TOKEN: ${{ secrets.EVALS_SITE_TOKEN }}
+        run: |
+          if [ -z "$EVALS_SITE_TOKEN" ]; then
+            echo "EVALS_SITE_TOKEN secret not configured; skipping publish."
+            echo "Create a fine-grained PAT scoped to zeroindex-ai/evals-site"
+            echo "(Contents: Read and write) and add it as EVALS_SITE_TOKEN."
+            exit 0
+          fi
+
+          RESULT=$(ls -t evals/results/run-*.json 2>/dev/null | head -1)
+          if [ -z "$RESULT" ]; then
+            echo "No eval result file found; skipping publish."
+            exit 0
+          fi
+          echo "Publishing $RESULT"
+
+          git clone --depth 1 \
+            "https://x-access-token:${EVALS_SITE_TOKEN}@github.com/zeroindex-ai/evals-site.git" \
+            /tmp/evals-site
+          cd /tmp/evals-site
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p artifacts/ask-zeroindex
+          cp "$GITHUB_WORKSPACE/$RESULT" artifacts/ask-zeroindex/
+
+          pnpm install --frozen-lockfile
+          pnpm render \
+            --in "artifacts/ask-zeroindex/$(basename "$RESULT")" \
+            --out public/ask-zeroindex/latest.html \
+            --project ask-zeroindex \
+            --threshold 0.8
+
+          git add public/ask-zeroindex/latest.html
+          if git diff --staged --quiet; then
+            echo "No HTML changes; nothing to publish."
+            exit 0
+          fi
+          git commit -m "publish: ask-zeroindex eval (from run ${GITHUB_RUN_ID})"
+          git push origin main
