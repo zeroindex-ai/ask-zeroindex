@@ -1,8 +1,9 @@
 import { requireEnv } from './env';
+import { MODELS } from './models';
 
 const VOYAGE_BASE = 'https://api.voyageai.com/v1';
-const EMBEDDING_MODEL = 'voyage-3';
-const RERANK_MODEL = 'rerank-2.5';
+const EMBEDDING_MODEL = MODELS.embeddings;
+const RERANK_MODEL = MODELS.rerank;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 

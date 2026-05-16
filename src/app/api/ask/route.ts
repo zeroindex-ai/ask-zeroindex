@@ -5,6 +5,13 @@ import { answer, ANSWER_MODEL } from '@/lib/claude';
 import { encodeSSE } from '@/lib/sse';
 import { errMsg } from '@/lib/errors';
 import { logAsk, type AskTrace } from '@/lib/logAsk';
+import { bucketKeyFromHeaders, checkRateLimit } from '@/lib/rateLimit';
+import {
+  buildCitation,
+  flushBuffer,
+  parseDelta,
+  type ParserState,
+} from '@/lib/citationParser';
 import type { Citation, RetrievedChunk } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -13,10 +20,9 @@ export const Body = z.object({
   question: z.string().min(1).max(500),
 });
 
-const QUOTE_MAX_CHARS = 160;
-// Long enough to hold "[chunk:NNNN]" while we wait to see if a trailing "[" is
-// the start of a citation marker.
-const MARKER_LOOKAHEAD = 16;
+// Well above the 500-char question limit + small JSON envelope. Rejects JSON
+// bombs before they reach req.json().
+const MAX_BODY_BYTES = 4096;
 
 // Comma-separated list of allowed origins. Empty = allow all (dev default).
 // Origin "null" matches file:// and the preview HTML.
@@ -36,57 +42,6 @@ function corsHeaders(origin: string | null): Record<string, string> {
     'Access-Control-Allow-Origin': origin ?? 'null',
     Vary: 'Origin',
   };
-}
-
-export function buildCitation(chunk: RetrievedChunk): Citation {
-  const quote =
-    chunk.content.length <= QUOTE_MAX_CHARS
-      ? chunk.content
-      : chunk.content.slice(0, QUOTE_MAX_CHARS).trimEnd() + '…';
-  return {
-    chunkId: chunk.id,
-    sourcePath: chunk.sourcePath,
-    section: chunk.section,
-    quote,
-  };
-}
-
-export type ParserState = { buffer: string };
-
-export function parseDelta(
-  delta: string,
-  state: ParserState
-): { text: string; cited: number[] } {
-  state.buffer += delta;
-
-  const markerRegex = /\[chunk:(\d+)\]/g;
-  const cited: number[] = [];
-  let textOut = '';
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = markerRegex.exec(state.buffer)) !== null) {
-    textOut += state.buffer.slice(lastIndex, match.index);
-    cited.push(parseInt(match[1], 10));
-    lastIndex = match.index + match[0].length;
-  }
-
-  const tail = state.buffer.slice(lastIndex);
-  const lastOpen = tail.lastIndexOf('[');
-  if (lastOpen >= 0 && tail.length - lastOpen < MARKER_LOOKAHEAD) {
-    textOut += tail.slice(0, lastOpen);
-    state.buffer = tail.slice(lastOpen);
-  } else {
-    textOut += tail;
-    state.buffer = '';
-  }
-
-  return { text: textOut, cited };
-}
-
-export function flushBuffer(state: ParserState): string {
-  const remainder = state.buffer;
-  state.buffer = '';
-  return remainder;
 }
 
 export async function OPTIONS(req: NextRequest) {
@@ -111,6 +66,38 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'forbidden_origin' }, { status: 403 });
   }
   const cors = corsHeaders(origin);
+
+  // Defense in depth: refuse oversize bodies before req.json() parses them.
+  // Zod's max(500) on `question` is a content-level check; this is a byte
+  // ceiling for the envelope.
+  const contentLength = req.headers.get('content-length');
+  if (contentLength !== null) {
+    const len = Number(contentLength);
+    if (Number.isFinite(len) && len > MAX_BODY_BYTES) {
+      return Response.json(
+        { error: 'payload_too_large' },
+        { status: 413, headers: cors }
+      );
+    }
+  }
+
+  // Rate limit before doing any paid-API work. Failure to read state should
+  // not hard-fail legitimate traffic — log and pass through.
+  try {
+    const key = bucketKeyFromHeaders(req.headers);
+    const decision = await checkRateLimit(key);
+    if (!decision.allowed) {
+      return Response.json(
+        { error: 'rate_limited', message: 'Too many requests. Please slow down.' },
+        {
+          status: 429,
+          headers: { ...cors, 'Retry-After': String(decision.retryAfterSec) },
+        }
+      );
+    }
+  } catch (err) {
+    console.warn('rate-limit check failed; allowing request:', errMsg(err));
+  }
 
   let parsed;
   try {

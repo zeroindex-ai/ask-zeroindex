@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { requireEnv } from './env';
+import { MODELS } from './models';
 import type { RetrievedChunk } from './types';
 
 const globalForAnthropic = globalThis as unknown as { __askZeroindexAnthropic?: Anthropic };
@@ -11,7 +12,7 @@ function client(): Anthropic {
   return globalForAnthropic.__askZeroindexAnthropic;
 }
 
-export const ANSWER_MODEL = 'claude-sonnet-4-6';
+export const ANSWER_MODEL = MODELS.answer;
 
 // Length of this prompt is for model quality, not caching. Several attempts
 // to engage Anthropic prompt caching at this corpus scale produced an

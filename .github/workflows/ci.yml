@@ -33,4 +33,11 @@ jobs:
 
       - run: pnpm test
 
+      # Coverage threshold is 75% (see vitest.config.ts). Reported in CI as a
+      # signal but not yet a hard gate — overall coverage is currently below
+      # threshold because I/O-bound modules (claude/embeddings/db) and the
+      # AskWidget React component are not yet directly unit-tested.
+      - run: pnpm test:coverage
+        continue-on-error: true
+
       - run: pnpm build
