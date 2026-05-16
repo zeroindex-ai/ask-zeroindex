@@ -4,26 +4,8 @@ import { hybridSearch } from '@/lib/retrieval';
 import { answer, ANSWER_MODEL } from '@/lib/claude';
 import { encodeSSE } from '@/lib/sse';
 import { errMsg } from '@/lib/errors';
+import { logAsk, type AskTrace } from '@/lib/logAsk';
 import type { Citation, RetrievedChunk } from '@/lib/types';
-
-type AskTrace = {
-  question: string;
-  outcome: 'ok' | 'retrieval_failed' | 'stream_failed' | 'aborted';
-  retrievedIds: number[];
-  citationCount: number;
-  retrievalMs: number;
-  firstTokenMs: number | null;
-  totalMs: number;
-  errorMessage?: string;
-};
-
-// Single-line JSON for Vercel log aggregation. Search/filter via the Vercel
-// dashboard or `vercel logs --json` and grep on event=ask.
-function logAsk(trace: AskTrace): void {
-  console.log(
-    JSON.stringify({ event: 'ask', ts: new Date().toISOString(), model: ANSWER_MODEL, ...trace })
-  );
-}
 
 export const runtime = 'nodejs';
 
@@ -153,16 +135,19 @@ export async function POST(req: NextRequest) {
     chunks = await hybridSearch(question);
   } catch (err) {
     console.error('retrieval failed:', errMsg(err));
-    logAsk({
-      question,
-      outcome: 'retrieval_failed',
-      retrievedIds: [],
-      citationCount: 0,
-      retrievalMs: Date.now() - t0,
-      firstTokenMs: null,
-      totalMs: Date.now() - t0,
-      errorMessage: errMsg(err),
-    });
+    logAsk(
+      {
+        question,
+        outcome: 'retrieval_failed',
+        retrievedIds: [],
+        citationCount: 0,
+        retrievalMs: Date.now() - t0,
+        firstTokenMs: null,
+        totalMs: Date.now() - t0,
+        errorMessage: errMsg(err),
+      },
+      { model: ANSWER_MODEL }
+    );
     return Response.json(
       { error: 'retrieval_failed', message: 'Could not retrieve sources. Please try again.' },
       { status: 502, headers: cors }
@@ -236,16 +221,19 @@ export async function POST(req: NextRequest) {
         }
       } finally {
         closed = true;
-        logAsk({
-          question,
-          outcome,
-          retrievedIds: chunks.map((c) => c.id),
-          citationCount: citations.length,
-          retrievalMs: tRetrieval - t0,
-          firstTokenMs: firstTokenAt === null ? null : firstTokenAt - t0,
-          totalMs: Date.now() - t0,
-          ...(errorMessage ? { errorMessage } : {}),
-        });
+        logAsk(
+          {
+            question,
+            outcome,
+            retrievedIds: chunks.map((c) => c.id),
+            citationCount: citations.length,
+            retrievalMs: tRetrieval - t0,
+            firstTokenMs: firstTokenAt === null ? null : firstTokenAt - t0,
+            totalMs: Date.now() - t0,
+            ...(errorMessage ? { errorMessage } : {}),
+          },
+          { model: ANSWER_MODEL }
+        );
         try {
           controller.close();
         } catch {

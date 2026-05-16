@@ -591,6 +591,7 @@ Verify with `gh secret list`. The workflow points at the **production** Turso DB
 
 ```json
 {
+  "source": "ask-zeroindex",
   "event": "ask",
   "ts": "2026-05-09T04:25:00.123Z",
   "model": "claude-sonnet-4-6",
@@ -604,7 +605,9 @@ Verify with `gh secret list`. The workflow points at the **production** Turso DB
 }
 ```
 
-`outcome` is one of `ok | retrieval_failed | stream_failed | aborted`. Failure cases include an `errorMessage` field. Query via `vercel logs ask-zeroindex --json | jq 'select(.message | fromjson? | .event == "ask")'` or filter by `event=ask` in the Vercel dashboard. If traffic justifies it later, port this same shape into a Turso `query_logs` table or an external service (Axiom, Logfire) without changing the call sites.
+`outcome` is one of `ok | retrieval_failed | stream_failed | aborted`. Failure cases include an `errorMessage` field. Query via `vercel logs ask-zeroindex --json | jq 'select(.message | fromjson? | .event == "ask")'` or filter by `event=ask` in the Vercel dashboard.
+
+**Optional dual-write to [trace-pack](https://github.com/zeroindex-ai/trace-pack).** Set `TRACE_PACK_URL` and `TRACE_PACK_TOKEN` in the Vercel env to enable; each emission then POSTs the same payload to `{TRACE_PACK_URL}/api/ingest` as a fire-and-forget call (`keepalive: true`, errors swallowed, console-log always still happens). When unset, `logAsk` is a no-op beyond the console line. The dual-write logic lives in `src/lib/logAsk.ts` and is fully covered by `logAsk.test.ts` — see those for the exact contract.
 
 ### Common issues
 
