@@ -9,7 +9,7 @@ export function db(): Client {
   if (globalForDb.__askZeroindexDb) return globalForDb.__askZeroindexDb;
   globalForDb.__askZeroindexDb = createClient({
     url: requireEnv('TURSO_DATABASE_URL'),
-    authToken: process.env.TURSO_AUTH_TOKEN,
+    authToken: requireEnv('TURSO_AUTH_TOKEN'),
   });
   return globalForDb.__askZeroindexDb;
 }
