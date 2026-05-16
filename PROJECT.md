@@ -226,7 +226,7 @@ ask-zeroindex/
 │   ├── verify.ts                   post-ingest sanity (counts + sample + retrieval)
 │   └── ask.ts                      end-to-end question → grounded answer w/ timing
 ├── evals/
-│   ├── golden.json                 Q/A pairs with must_mention assertions (currently 2 sample)
+│   ├── golden-seed.json            Q/A pairs with must_mention assertions (30 hand-labeled items)
 │   └── run.ts                      LLM-as-judge harness
 ├── data/                           source content drop-zone (currently empty; ingest reads from sibling website repo)
 ├── public/                         static assets (default Next scaffold)
@@ -462,7 +462,7 @@ Spent ~90 min isolating cache behavior in `scripts/cache-repro.ts`. Single-block
 
 ### Golden Q/A + LLM-as-judge (`evals/`)
 
-Format (`evals/golden.json`):
+Format (`evals/golden-seed.json`):
 
 ```json
 [

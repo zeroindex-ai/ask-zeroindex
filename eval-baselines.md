@@ -178,7 +178,15 @@ The biggest delta came from the negative category (50% → 100%) — the explici
 
 ### Side effect that didn't pan out: caching investigation
 
-Hypothesis going in: longer prompt (~1500 tokens cacheable prefix vs ~970 baseline) would clear Sonnet's 1024-token minimum and caching would engage. **Verified false** — investigation below.
+Hypothesis going in: longer prompt (~1500 tokens cacheable prefix vs ~970 baseline) would clear Sonnet's 1024-token minimum and caching would engage. **Verified false** — investigation in §6.
+
+## 5. Open work
+
+1. **Cache hit rate verification** — quick `cache-stats.ts` re-run with the new prompt to capture before/after token counts
+2. **Multi-part instruction tuning** — add "address each part fully; don't truncate sub-answers" to system prompt
+3. **Refusal coverage expansion** — current 6 negative items; would benefit from 10-12 to bound the 100% claim
+4. **Adversarial coverage expansion** — currently 3 items; consider data-exfiltration probes, jailbreak chains
+5. **Observability** — log eval pass-rate trends over time when `evals/run.ts` runs in CI
 
 ## 6. Prompt cache investigation (2026-05-08)
 
@@ -233,11 +241,3 @@ After the 2 label fixes, the same prompt would score **29/30 (97%)** without fur
 - **System prompt iteration shipped** — 90% pass rate is the new baseline; future regressions show up in the `evals/run.ts` deltas
 - **Caching enabled as a side effect** — longer prompt was a quality win first, cache enablement second
 - **Multi-part coverage gap** documented; treat as the leading-edge improvement for the next pass
-
-## 5. Open work
-
-1. **Cache hit rate verification** — quick `cache-stats.ts` re-run with the new prompt to capture before/after token counts
-2. **Multi-part instruction tuning** — add "address each part fully; don't truncate sub-answers" to system prompt
-3. **Refusal coverage expansion** — current 6 negative items; would benefit from 10-12 to bound the 100% claim
-4. **Adversarial coverage expansion** — currently 3 items; consider data-exfiltration probes, jailbreak chains
-5. **Observability** — log eval pass-rate trends over time when `evals/run.ts` runs in CI

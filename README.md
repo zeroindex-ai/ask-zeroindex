@@ -41,7 +41,7 @@ src/
 scripts/
   ingest.ts            content → chunks → embeddings → DB
 evals/
-  golden.json          Q/A pairs with must_mention assertions
+  golden-seed.json     Q/A pairs with must_mention assertions (30 hand-labeled items)
   run.ts               LLM-as-judge harness
 data/                  source content (gitignored — pulled fresh per ingest)
 ```
