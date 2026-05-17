@@ -70,13 +70,13 @@ describe('logAsk', () => {
   });
 
   it('does NOT call fetch when TRACE_PACK_TOKEN is unset', () => {
-    process.env.TRACE_PACK_URL = 'https://trace.zeroindex.ai';
+    process.env.TRACE_PACK_URL = 'https://traces.zeroindex.ai';
     logAsk(SAMPLE_TRACE, { model: MODEL });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('POSTs to {TRACE_PACK_URL}/api/ingest with bearer auth + keepalive when both env vars set', async () => {
-    process.env.TRACE_PACK_URL = 'https://trace.zeroindex.ai';
+    process.env.TRACE_PACK_URL = 'https://traces.zeroindex.ai';
     process.env.TRACE_PACK_TOKEN = 'my-secret-token';
 
     logAsk(SAMPLE_TRACE, { model: MODEL });
@@ -84,7 +84,7 @@ describe('logAsk', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://trace.zeroindex.ai/api/ingest');
+    expect(url).toBe('https://traces.zeroindex.ai/api/ingest');
     expect(init.method).toBe('POST');
     const headers = init.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer my-secret-token');
@@ -98,16 +98,16 @@ describe('logAsk', () => {
   });
 
   it('strips a trailing slash from TRACE_PACK_URL before appending /api/ingest', async () => {
-    process.env.TRACE_PACK_URL = 'https://trace.zeroindex.ai/';
+    process.env.TRACE_PACK_URL = 'https://traces.zeroindex.ai/';
     process.env.TRACE_PACK_TOKEN = 'token';
     logAsk(SAMPLE_TRACE, { model: MODEL });
     await flushMicrotasks();
     const [url] = fetchSpy.mock.calls[0] as [string];
-    expect(url).toBe('https://trace.zeroindex.ai/api/ingest');
+    expect(url).toBe('https://traces.zeroindex.ai/api/ingest');
   });
 
   it('swallows fetch errors and warns', async () => {
-    process.env.TRACE_PACK_URL = 'https://trace.zeroindex.ai';
+    process.env.TRACE_PACK_URL = 'https://traces.zeroindex.ai';
     process.env.TRACE_PACK_TOKEN = 'token';
     fetchSpy.mockRejectedValue(new Error('network down'));
 
