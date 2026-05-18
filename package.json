@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "ingest": "tsx scripts/ingest.ts",
-    "eval": "tsx evals/run.ts"
+    "eval": "tsx evals/run.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
@@ -36,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
