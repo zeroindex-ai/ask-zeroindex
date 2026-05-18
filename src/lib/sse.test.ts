@@ -63,9 +63,7 @@ describe('parseSSE', () => {
       { type: 'done', data: { citations: [] } },
       { type: 'error', data: { message: 'boom' } },
     ];
-    const concatenated = inputs
-      .map((e) => new TextDecoder().decode(encodeSSE(e)))
-      .join('');
+    const concatenated = inputs.map((e) => new TextDecoder().decode(encodeSSE(e))).join('');
     expect(await collect(makeResponse([concatenated]))).toEqual(inputs);
   });
 
@@ -75,9 +73,7 @@ describe('parseSSE', () => {
   });
 
   it('handles multiple events in one read', async () => {
-    const res = makeResponse([
-      'event: text\ndata: "a"\n\nevent: text\ndata: "b"\n\n',
-    ]);
+    const res = makeResponse(['event: text\ndata: "a"\n\nevent: text\ndata: "b"\n\n']);
     expect(await collect(res)).toEqual([
       { type: 'text', data: 'a' },
       { type: 'text', data: 'b' },
@@ -85,9 +81,7 @@ describe('parseSSE', () => {
   });
 
   it('skips frames with invalid JSON data and continues', async () => {
-    const res = makeResponse([
-      'event: text\ndata: not-json\n\nevent: text\ndata: "ok"\n\n',
-    ]);
+    const res = makeResponse(['event: text\ndata: not-json\n\nevent: text\ndata: "ok"\n\n']);
     expect(await collect(res)).toEqual([{ type: 'text', data: 'ok' }]);
   });
 

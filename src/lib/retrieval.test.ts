@@ -31,9 +31,7 @@ describe('sanitizeFtsQuery', () => {
   });
 
   it('strips FTS5 operators and punctuation', () => {
-    expect(sanitizeFtsQuery('AND OR NOT NEAR + - "')).toBe(
-      '"and" OR "or" OR "not" OR "near"'
-    );
+    expect(sanitizeFtsQuery('AND OR NOT NEAR + - "')).toBe('"and" OR "or" OR "not" OR "near"');
   });
 
   it('strips question mark from end of query', () => {

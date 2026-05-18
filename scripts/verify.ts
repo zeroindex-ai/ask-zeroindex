@@ -15,7 +15,9 @@ async function main() {
   console.log(`chunks_fts:   ${ftsCount.rows[0].n} rows`);
 
   console.log('\n--- first 3 chunks ---');
-  const sample = await c.execute('SELECT id, section, substr(content, 1, 120) as preview FROM chunks LIMIT 3');
+  const sample = await c.execute(
+    'SELECT id, section, substr(content, 1, 120) as preview FROM chunks LIMIT 3'
+  );
   for (const r of sample.rows) {
     console.log(`[${r.id}] ${r.section}\n  ${r.preview}...`);
   }
@@ -23,7 +25,9 @@ async function main() {
   console.log('\n--- test retrieval: "What services do you offer?" ---');
   const results = await hybridSearch('What services do you offer?', 3);
   for (const r of results) {
-    console.log(`[${r.id}] score=${r.score.toFixed(3)} section="${r.section}"\n  ${r.content.slice(0, 120)}...`);
+    console.log(
+      `[${r.id}] score=${r.score.toFixed(3)} section="${r.section}"\n  ${r.content.slice(0, 120)}...`
+    );
   }
 }
 

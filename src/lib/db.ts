@@ -38,9 +38,7 @@ export async function initSchema(): Promise<void> {
       embedding F32_BLOB(${EMBEDDING_DIM})
     )
   `);
-  await c.execute(
-    `CREATE INDEX IF NOT EXISTS idx_chunks_vec ON chunks(libsql_vector_idx(embedding))`
-  );
+  await c.execute(`CREATE INDEX IF NOT EXISTS idx_chunks_vec ON chunks(libsql_vector_idx(embedding))`);
   await c.execute(`
     CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts
     USING fts5(content, content='chunks', content_rowid='id')

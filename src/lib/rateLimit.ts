@@ -65,10 +65,7 @@ export function computeNextState(
   };
 }
 
-export async function checkRateLimit(
-  key: string,
-  opts: RateLimitOptions = {}
-): Promise<RateLimitDecision> {
+export async function checkRateLimit(key: string, opts: RateLimitOptions = {}): Promise<RateLimitDecision> {
   const now = opts.now ?? Date.now;
   const c = opts.client ?? db;
   const capacity = opts.capacity ?? BUCKET_CAPACITY;
@@ -82,10 +79,8 @@ export async function checkRateLimit(
   });
 
   const row = existing.rows[0];
-  const currentTokens =
-    row && row.tokens !== null ? Number(row.tokens) : capacity;
-  const lastUpdated =
-    row && row.updated_at !== null ? Number(row.updated_at) : nowMs;
+  const currentTokens = row && row.tokens !== null ? Number(row.tokens) : capacity;
+  const lastUpdated = row && row.updated_at !== null ? Number(row.updated_at) : nowMs;
 
   const next = computeNextState(currentTokens, lastUpdated, nowMs, capacity, refillPerSec);
 

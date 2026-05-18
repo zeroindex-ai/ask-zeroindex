@@ -81,9 +81,7 @@ async function main() {
   // 1024-token threshold), this is 0% by definition.
   const cacheable = totalCacheRead + totalCacheWrite;
   const hitRate = cacheable > 0 ? (totalCacheRead / cacheable) * 100 : 0;
-  console.log(
-    `\nCache hit rate: ${hitRate.toFixed(1)}% (${totalCacheRead} read / ${cacheable} cacheable)`
-  );
+  console.log(`\nCache hit rate: ${hitRate.toFixed(1)}% (${totalCacheRead} read / ${cacheable} cacheable)`);
 
   const cost =
     (totalInput * PRICE.input +
@@ -92,8 +90,7 @@ async function main() {
       totalOutput * PRICE.output) /
     1_000_000;
   const costNoCache =
-    ((totalInput + totalCacheRead + totalCacheWrite) * PRICE.input + totalOutput * PRICE.output) /
-    1_000_000;
+    ((totalInput + totalCacheRead + totalCacheWrite) * PRICE.input + totalOutput * PRICE.output) / 1_000_000;
   const savingsPct = ((costNoCache - cost) / costNoCache) * 100;
   console.log(`Estimated cost (this run, Sonnet 4.6): $${cost.toFixed(5)}`);
   console.log(

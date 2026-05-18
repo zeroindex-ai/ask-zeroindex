@@ -30,10 +30,7 @@ export function buildCitation(chunk: RetrievedChunk): Citation {
   };
 }
 
-export function parseDelta(
-  delta: string,
-  state: ParserState
-): { text: string; cited: number[] } {
+export function parseDelta(delta: string, state: ParserState): { text: string; cited: number[] } {
   state.buffer += delta;
 
   const markerRegex = /\[chunk:(\d+)\]/g;

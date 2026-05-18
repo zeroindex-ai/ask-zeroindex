@@ -57,14 +57,14 @@ pnpm dev
 
 ## Scripts
 
-| Command | Purpose |
-|---|---|
-| `pnpm dev` | Next.js dev server (Turbopack) |
-| `pnpm build` | Production build |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm lint` | ESLint |
-| `pnpm ingest` | Run content ingest pipeline |
-| `pnpm eval` | Run golden Q/A through pipeline + LLM judge |
+| Command          | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| `pnpm dev`       | Next.js dev server (Turbopack)              |
+| `pnpm build`     | Production build                            |
+| `pnpm typecheck` | `tsc --noEmit`                              |
+| `pnpm lint`      | ESLint                                      |
+| `pnpm ingest`    | Run content ingest pipeline                 |
+| `pnpm eval`      | Run golden Q/A through pipeline + LLM judge |
 
 ## Deploy
 

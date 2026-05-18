@@ -226,7 +226,9 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
             >
               {answer}
               {status === 'streaming' && (
-                <span aria-hidden="true" className="text-[var(--accent-1)]">▍</span>
+                <span aria-hidden="true" className="text-[var(--accent-1)]">
+                  ▍
+                </span>
               )}
             </div>
           )}

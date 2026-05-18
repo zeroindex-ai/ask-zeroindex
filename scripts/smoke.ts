@@ -38,7 +38,10 @@ async function main() {
       messages: [{ role: 'user', content: 'Say "ok" and nothing else.' }],
     });
     const text = m.content[0].type === 'text' ? m.content[0].text : '';
-    results.push(['Anthropic', text.toLowerCase().includes('ok') ? `OK (${text.trim()})` : `FAIL: got "${text}"`]);
+    results.push([
+      'Anthropic',
+      text.toLowerCase().includes('ok') ? `OK (${text.trim()})` : `FAIL: got "${text}"`,
+    ]);
   } catch (e) {
     results.push(['Anthropic', `FAIL: ${errMsg(e)}`]);
   }

@@ -31,37 +31,38 @@ All scripts respect `RERANK_THROTTLE_MS` (default 21000ms for Voyage's 3 RPM fre
 
 ### Aggregate results
 
-| Mode | Mean Recall@K | p50 latency | p95 latency |
-|---|---|---|---|
-| vector-only top-5 | 77.6% | 9020ms | 23516ms |
-| fts-only top-5 | **55.1%** | **166ms** | **427ms** |
-| hybrid+rerank top-3 | 83.3% | 21575ms* | 22424ms* |
-| **hybrid+rerank top-5 (production)** | **85.3%** | **21575ms*** | **22424ms*** |
-| hybrid+rerank top-8 | 92.3% | 21575ms* | 22424ms* |
+| Mode                                 | Mean Recall@K | p50 latency   | p95 latency   |
+| ------------------------------------ | ------------- | ------------- | ------------- |
+| vector-only top-5                    | 77.6%         | 9020ms        | 23516ms       |
+| fts-only top-5                       | **55.1%**     | **166ms**     | **427ms**     |
+| hybrid+rerank top-3                  | 83.3%         | 21575ms\*     | 22424ms\*     |
+| **hybrid+rerank top-5 (production)** | **85.3%**     | **21575ms\*** | **22424ms\*** |
+| hybrid+rerank top-8                  | 92.3%         | 21575ms\*     | 22424ms\*     |
 
 \* Hybrid latencies are inflated by the 21s rate-limit throttle on free-tier Voyage. Real-world latency (paid tier or production) is ~500–1500ms per query end-to-end (vector + FTS + rerank). The relative ordering across modes is unaffected.
 
 ### Per-query breakdown (hybrid+rerank top-5)
 
-| Query | Recall | Notes |
-|---|---|---|
-| services-list | 0% | Labels point only at engagement-card chunks; the actual top-5 includes "Where AI fits" chunks that also describe services. **Likely a label issue, not a retrieval issue.** |
-| pricing | 100% | |
-| founder-bio | 100% | |
-| engagement-start | 100% | |
-| tech-stack | 100% | |
-| audit-detail | 100% | |
-| code-review | 100% | |
-| engagement-duration | 100% | |
-| principles | 33% | **Real gap** — retrieves only 1 of 3 principle chunks. The principles section is split across 3 sibling chunks (16, 17, 18); reranker tends to pick chunk 16 + adjacent semantically-similar chunks rather than all three principles. |
-| doc-intelligence | 100% | |
-| contact | 100% | |
-| ai-skepticism | 100% | |
-| engagement-process | 75% | Missed chunk 7 ("Scope it"). Process is a 4-chunk sequence (6, 7, 8, 9); reranker takes 3 of 4. |
+| Query               | Recall | Notes                                                                                                                                                                                                                                 |
+| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| services-list       | 0%     | Labels point only at engagement-card chunks; the actual top-5 includes "Where AI fits" chunks that also describe services. **Likely a label issue, not a retrieval issue.**                                                           |
+| pricing             | 100%   |                                                                                                                                                                                                                                       |
+| founder-bio         | 100%   |                                                                                                                                                                                                                                       |
+| engagement-start    | 100%   |                                                                                                                                                                                                                                       |
+| tech-stack          | 100%   |                                                                                                                                                                                                                                       |
+| audit-detail        | 100%   |                                                                                                                                                                                                                                       |
+| code-review         | 100%   |                                                                                                                                                                                                                                       |
+| engagement-duration | 100%   |                                                                                                                                                                                                                                       |
+| principles          | 33%    | **Real gap** — retrieves only 1 of 3 principle chunks. The principles section is split across 3 sibling chunks (16, 17, 18); reranker tends to pick chunk 16 + adjacent semantically-similar chunks rather than all three principles. |
+| doc-intelligence    | 100%   |                                                                                                                                                                                                                                       |
+| contact             | 100%   |                                                                                                                                                                                                                                       |
+| ai-skepticism       | 100%   |                                                                                                                                                                                                                                       |
+| engagement-process  | 75%    | Missed chunk 7 ("Scope it"). Process is a 4-chunk sequence (6, 7, 8, 9); reranker takes 3 of 4.                                                                                                                                       |
 
 ### Decision
 
 **Stay at hybrid+rerank top-5.** Reasoning:
+
 - Top-3 → top-5 lifts mean recall 83% → 85% with negligible cost
 - Top-5 → top-8 lifts to 92% but loads >36% of the 22-chunk corpus into context every request — citation noise, more cache write cost, weaker signal-to-noise in answer quality
 - The 3 misses at top-5 are addressable separately:
@@ -80,37 +81,39 @@ All scripts respect `RERANK_THROTTLE_MS` (default 21000ms for Voyage's 3 RPM fre
 
 ### Result: 0% cache hit rate
 
-| Query | Input tokens | Cache write | Cache read | Output |
-|---|---|---|---|---|
-| What services does ZeroIndex offer? | 1087 | 0 | 0 | 211 |
-| How does pricing work? | 1002 | 0 | 0 | 111 |
-| Tell me about Abhishek. | 1074 | 0 | 0 | 296 |
-| How does an engagement start? | 980 | 0 | 0 | 116 |
-| What technologies do you use? | 1032 | 0 | 0 | 213 |
-| **Total** | **5175** | **0** | **0** | **947** |
+| Query                               | Input tokens | Cache write | Cache read | Output  |
+| ----------------------------------- | ------------ | ----------- | ---------- | ------- |
+| What services does ZeroIndex offer? | 1087         | 0           | 0          | 211     |
+| How does pricing work?              | 1002         | 0           | 0          | 111     |
+| Tell me about Abhishek.             | 1074         | 0           | 0          | 296     |
+| How does an engagement start?       | 980          | 0           | 0          | 116     |
+| What technologies do you use?       | 1032         | 0           | 0          | 213     |
+| **Total**                           | **5175**     | **0**       | **0**      | **947** |
 
 Cost this run: **$0.0297**. Cost without caching: same. **No savings.**
 
 ### Why caching is silently a no-op at current scale
 
 Anthropic's prompt cache has a minimum cacheable prefix size: **1024 tokens for Sonnet**. Our cacheable prefix (system prompt + retrieved context, but **not** the user message) is hovering between 970 and 1077 tokens — right at the threshold. Even when total `input_tokens` exceeds 1024 (some queries do), `cache_creation_input_tokens` stays at 0. The marker is honored only when the cacheable portion alone clears the minimum, and we're reliably under it because:
+
 - System prompt: ~200 tokens
 - 5 retrieved chunks: ~700 tokens (avg 280 chars each + headers)
 - Combined: ~900 tokens, mostly below 1024
 
 ### Three paths to enable caching (deferred to the prompt iteration)
 
-| Approach | Effect | Tradeoff |
-|---|---|---|
+| Approach                                                             | Effect                                                                                                                                             | Tradeoff                                                                                       |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Extend system prompt to ~1500 tokens with style guidance + few-shots | System block alone caches → ~225 tokens read instead of regular input every request after first. ~10× cost reduction on the system prefix portion. | Requires authoring quality content (this is also a model-quality win, not purely a cache play) |
-| Increase retrieved chunks to top-8 | Context block alone clears 1024 tokens → cache hits when same chunks are retrieved | Already rejected for retrieval-noise reasons |
-| Increase chunk size (`TARGET_CHARS` 1600 → 2400) | Each chunk grows; 5 chunks × ~600 tokens ≈ 3000 tokens of context. Cleanly above threshold. | Coarser chunks may hurt retrieval precision; would need a re-ablation to validate |
+| Increase retrieved chunks to top-8                                   | Context block alone clears 1024 tokens → cache hits when same chunks are retrieved                                                                 | Already rejected for retrieval-noise reasons                                                   |
+| Increase chunk size (`TARGET_CHARS` 1600 → 2400)                     | Each chunk grows; 5 chunks × ~600 tokens ≈ 3000 tokens of context. Cleanly above threshold.                                                        | Coarser chunks may hurt retrieval precision; would need a re-ablation to validate              |
 
 **Recommendation:** combine (1) with the prompt iteration — write the style guide / few-shots that make answers sharper, and let the cache benefit fall out as a side effect.
 
 ### Cost projection at production scale
 
 Assumptions:
+
 - 1000 visitor queries / month (conservative for a consultancy site)
 - Average 5175 input + 1000 output tokens per query (current measured)
 - No caching active (current state)
@@ -118,6 +121,7 @@ Assumptions:
 Per Sonnet 4.6 pricing ($3/M input, $15/M output): **~$30/month** at this scale.
 
 After (1) takes effect, with system prompt cached:
+
 - ~200 tokens × $0.30/M cache read × 1000 queries = $0.06 (vs $0.60 uncached)
 - ~$30 → $29.40/month — modest 2% saving at this scale; matters more if traffic grows.
 
@@ -125,49 +129,51 @@ Conclusion: caching is a "nice when it engages" optimization; not a critical pat
 
 ## 3. Configuration after retrieval ablation
 
-| Knob | Value | Rationale |
-|---|---|---|
-| Vector top-K (intermediate) | 12 | (existing) |
-| FTS top-K (intermediate) | 12 | (existing) |
-| Rerank top-K (final) | **5** | 85.3% recall; balances quality and context size |
-| Embedding model | `voyage-3` (1024 dim) | (existing) |
-| Reranker | `rerank-2.5` | (existing) |
-| Answer model | `claude-sonnet-4-6` | (existing) |
-| Cache control | `ephemeral` on system + context | (existing — currently no-op until system prompt grows) |
-| Chunk target size | 1600 chars / ~70 tokens | (existing — revisit if eval baseline degrades after expanding to 30 queries) |
+| Knob                        | Value                           | Rationale                                                                    |
+| --------------------------- | ------------------------------- | ---------------------------------------------------------------------------- |
+| Vector top-K (intermediate) | 12                              | (existing)                                                                   |
+| FTS top-K (intermediate)    | 12                              | (existing)                                                                   |
+| Rerank top-K (final)        | **5**                           | 85.3% recall; balances quality and context size                              |
+| Embedding model             | `voyage-3` (1024 dim)           | (existing)                                                                   |
+| Reranker                    | `rerank-2.5`                    | (existing)                                                                   |
+| Answer model                | `claude-sonnet-4-6`             | (existing)                                                                   |
+| Cache control               | `ephemeral` on system + context | (existing — currently no-op until system prompt grows)                       |
+| Chunk target size           | 1600 chars / ~70 tokens         | (existing — revisit if eval baseline degrades after expanding to 30 queries) |
 
 ## 4. LLM-as-judge eval + prompt iteration
 
 **Question:** end-to-end, how often does the widget answer well? And does prompt iteration measurably improve refusal quality and answer style?
 
 **Setup:**
+
 - 30-query golden seed: 19 positive, 6 negative, 3 adversarial, 2 multi-part
 - Each query → hybridSearch + Claude answer + programmatic checks + Claude judge
 - Pass = `mentions_ok ∧ avoids_ok ∧ citation_ok ∧ judge.appropriate=yes ∧ judge.grounded ∈ {yes, na}`
 
 ### Baseline (short system prompt, before iteration)
 
-| Category | Pass | Notable failures |
-|---|---|---|
-| positive | 16/19 (84%) | 3 false-positives from over-strict `must_mention` (substring "weeks" not matching "week", "scope" not matching "scoping", "truth" missing for paraphrased answer) |
-| negative | 3/6 (50%) | Model refuses then volunteers unrequested ZeroIndex info (ruby-stack, healthcare-portal, competitor-compare) |
-| adversarial | 1/3 (33%) | Model refuses cleanly but `expect_refusal: false` was the wrong label for ignore/system-leak (refusal IS the right answer) |
-| multi-part | 2/2 (100%) | — |
-| **TOTAL** | **22/30 (73%)** | |
+| Category    | Pass            | Notable failures                                                                                                                                                  |
+| ----------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| positive    | 16/19 (84%)     | 3 false-positives from over-strict `must_mention` (substring "weeks" not matching "week", "scope" not matching "scoping", "truth" missing for paraphrased answer) |
+| negative    | 3/6 (50%)       | Model refuses then volunteers unrequested ZeroIndex info (ruby-stack, healthcare-portal, competitor-compare)                                                      |
+| adversarial | 1/3 (33%)       | Model refuses cleanly but `expect_refusal: false` was the wrong label for ignore/system-leak (refusal IS the right answer)                                        |
+| multi-part  | 2/2 (100%)      | —                                                                                                                                                                 |
+| **TOTAL**   | **22/30 (73%)** |                                                                                                                                                                   |
 
 ### After (longer system prompt with style + refusal guidance + few-shots; labels corrected)
 
-| Category | Pass | Δ vs baseline |
-|---|---|---|
-| positive | 18/19 (95%) | **+11pp** |
-| negative | 6/6 (100%) | **+50pp** |
-| adversarial | 2/3 (67%) | +34pp |
-| multi-part | 1/2 (50%) | -50pp (sample size 2 — noise) |
-| **TOTAL** | **27/30 (90%)** | **+17pp** |
+| Category    | Pass            | Δ vs baseline                 |
+| ----------- | --------------- | ----------------------------- |
+| positive    | 18/19 (95%)     | **+11pp**                     |
+| negative    | 6/6 (100%)      | **+50pp**                     |
+| adversarial | 2/3 (67%)       | +34pp                         |
+| multi-part  | 1/2 (50%)       | -50pp (sample size 2 — noise) |
+| **TOTAL**   | **27/30 (90%)** | **+17pp**                     |
 
 ### What changed in the system prompt
 
 Extended `SYSTEM_PROMPT` in `src/lib/claude.ts` from ~200 tokens to ~600 tokens, adding:
+
 - **Style section** — plain English, no AI-speak, 1-3 paragraphs default, concrete not generic
 - **"When the answer IS in the source"** — answer + cite + don't apologize
 - **"When the answer is NOT in the source"** — refuse cleanly, do NOT pivot to listing what ZeroIndex DOES do, do NOT compare with named entities you have no info about
@@ -196,20 +202,21 @@ Spent ~90 minutes nailing down why `cache_control` doesn't engage in our wrapper
 
 `scripts/cache-repro.ts` exercises increasingly close variants of our request shape:
 
-| Variant | Shape | Cache result |
-|---|---|---|
-| Single 5800-token block, marker on it | `system: [{text: BIG, cache_control}]` | ✓ Works perfectly. Call 1 writes 5702; Call 2-3 read 5702. |
-| Two blocks, marker on the larger 2nd block (~2000 tok) | `system: [{text: SMALL}, {text: BIG, cache_control}]` | ✓ Works. Cumulative + block size both ≥ 1024. |
-| Two blocks, marker on smaller 1st block (~485 tok) | `system: [{text: SMALL, cache_control}, {text: BIG}]` | ✗/⚠ Inconsistent: Call 1 doesn't cache; Call 2 spuriously writes the entire prefix; Call 3 writes again with no read |
-| **Our wrapper** with extended ~1500-token SYSTEM_PROMPT, marker on system block | `system: [{text: SYSTEM_PROMPT, cache_control}, {text: context}]` | ✗ Asymmetric pattern: cache_w fires every call, cache_r is always 0 |
-| Same as above but context moved to user message (single system block, marker on it) | `system: [{text: SYSTEM_PROMPT, cache_control}]` + context in `messages` | ✗ Same asymmetric pattern |
-| Upgrading SDK 0.92 → 0.95.1 | (any of above) | ✗ No change in behavior |
+| Variant                                                                             | Shape                                                                    | Cache result                                                                                                         |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Single 5800-token block, marker on it                                               | `system: [{text: BIG, cache_control}]`                                   | ✓ Works perfectly. Call 1 writes 5702; Call 2-3 read 5702.                                                           |
+| Two blocks, marker on the larger 2nd block (~2000 tok)                              | `system: [{text: SMALL}, {text: BIG, cache_control}]`                    | ✓ Works. Cumulative + block size both ≥ 1024.                                                                        |
+| Two blocks, marker on smaller 1st block (~485 tok)                                  | `system: [{text: SMALL, cache_control}, {text: BIG}]`                    | ✗/⚠ Inconsistent: Call 1 doesn't cache; Call 2 spuriously writes the entire prefix; Call 3 writes again with no read |
+| **Our wrapper** with extended ~1500-token SYSTEM_PROMPT, marker on system block     | `system: [{text: SYSTEM_PROMPT, cache_control}, {text: context}]`        | ✗ Asymmetric pattern: cache_w fires every call, cache_r is always 0                                                  |
+| Same as above but context moved to user message (single system block, marker on it) | `system: [{text: SYSTEM_PROMPT, cache_control}]` + context in `messages` | ✗ Same asymmetric pattern                                                                                            |
+| Upgrading SDK 0.92 → 0.95.1                                                         | (any of above)                                                           | ✗ No change in behavior                                                                                              |
 
 The asymmetric pattern (writes every call, reads never) is **net negative**: each call after the first is billed at cache-write rate (1.25× input) without the read benefit (0.10× input). Estimated cost penalty at our scale: +25% on the system+context portion of every call after the first.
 
 ### What's still unexplained
 
 The single-block known-good case (Variant 1) caches normally. As soon as we put two blocks in `system` with our specific content — even when the marked block clearly clears the 1024-token minimum and is a constant string across calls — the asymmetric write-without-read pattern reappears. We could not isolate which characteristic of our content triggers it. Candidates we could not eliminate:
+
 - `<context>...</context>` literal tags in the second block (XML-style content may interact with caching heuristics)
 - Account-level cache settings or API tier behavior we don't have visibility into
 - A subtle SDK serialization difference we couldn't see without wire-level capture
@@ -217,16 +224,18 @@ The single-block known-good case (Variant 1) caches normally. As soon as we put 
 ### Decision
 
 **Removed `cache_control` from `src/lib/claude.ts` entirely.** Reasons:
+
 - Without the marker, every call costs 1.0× input — predictable, no penalty
 - With the marker (current setup), every call costs 1.25× input on writes plus the cache never reads — net 25% worse than no marker
-- At our traffic scale (~$30/mo projected at 1000 queries), the *theoretical* cache savings would be ~$1/mo. Not worth more debugging hours.
+- At our traffic scale (~$30/mo projected at 1000 queries), the _theoretical_ cache savings would be ~$1/mo. Not worth more debugging hours.
 
 Pre-conditions to revisit:
+
 - Traffic > 10k queries/month (savings start mattering)
 - OR Anthropic publishes more docs / tooling clarifying the asymmetric pattern
 - OR we test on a different account / API tier and see if behavior differs
 
-The longer SYSTEM_PROMPT (the side of the experiment that was supposed to *enable* caching) **stays** — that change earned its keep on eval quality (73 → 90% pass rate) regardless of caching.
+The longer SYSTEM*PROMPT (the side of the experiment that was supposed to \_enable* caching) **stays** — that change earned its keep on eval quality (73 → 90% pass rate) regardless of caching.
 
 ### Remaining failures (3 of 30)
 

@@ -6,12 +6,7 @@ import { encodeSSE } from '@/lib/sse';
 import { errMsg } from '@/lib/errors';
 import { logAsk, type AskTrace } from '@/lib/logAsk';
 import { bucketKeyFromHeaders, checkRateLimit } from '@/lib/rateLimit';
-import {
-  buildCitation,
-  flushBuffer,
-  parseDelta,
-  type ParserState,
-} from '@/lib/citationParser';
+import { buildCitation, flushBuffer, parseDelta, type ParserState } from '@/lib/citationParser';
 import type { Citation, RetrievedChunk } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -74,10 +69,7 @@ export async function POST(req: NextRequest) {
   if (contentLength !== null) {
     const len = Number(contentLength);
     if (Number.isFinite(len) && len > MAX_BODY_BYTES) {
-      return Response.json(
-        { error: 'payload_too_large' },
-        { status: 413, headers: cors }
-      );
+      return Response.json({ error: 'payload_too_large' }, { status: 413, headers: cors });
     }
   }
 

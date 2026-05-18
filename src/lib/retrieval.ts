@@ -79,7 +79,11 @@ export async function hybridCandidates(query: string): Promise<RetrievedChunk[]>
 export async function hybridSearch(query: string, topK = RERANK_TOP_K): Promise<RetrievedChunk[]> {
   const candidates = await hybridCandidates(query);
   if (candidates.length === 0) return [];
-  const reranked = await rerank(query, candidates.map((c) => c.content), topK);
+  const reranked = await rerank(
+    query,
+    candidates.map((c) => c.content),
+    topK
+  );
   return reranked.map((r) => ({
     ...candidates[r.index],
     score: r.score,

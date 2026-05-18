@@ -1,26 +1,26 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Fonts loaded via <link> in layout.tsx — Tailwind's @import expands first,
    so additional @import rules in CSS are invalid per spec.
    Token values mirror zeroindex.ai so widget paint stays in lockstep. */
 :root {
-  --accent-1: #7c3aed;     /* violet-600, matches zeroindex.ai brand */
+  --accent-1: #7c3aed; /* violet-600, matches zeroindex.ai brand */
   --muted: #a1a1aa;
   --muted-2: #8b8d96;
-  --line: #2e2924;         /* warm dark border */
-  --line-strong: #3f3930;  /* warm dark hover/separator */
+  --line: #2e2924; /* warm dark border */
+  --line-strong: #3f3930; /* warm dark hover/separator */
 }
 
 body {
-  background: #100d09;     /* warm near-black — perceptible warmth without reading brown */
+  background: #100d09; /* warm near-black — perceptible warmth without reading brown */
   color: #ffffff;
-  font-family: "Inter", system-ui, sans-serif;
-  font-feature-settings: "ss01", "cv11";
+  font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
 }
 
 .label {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;

@@ -55,9 +55,7 @@ describe('Voyage retry policy (via embedDocuments)', () => {
   });
 
   it('throws after 3 consecutive 5xx responses', async () => {
-    fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response('still broken', { status: 502 }));
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('still broken', { status: 502 }));
 
     const { embedDocuments } = await import('./embeddings');
     const promise = embedDocuments(['hello']).catch((e: unknown) => e);
@@ -69,9 +67,7 @@ describe('Voyage retry policy (via embedDocuments)', () => {
   });
 
   it('does NOT retry on 4xx — throws immediately', async () => {
-    fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response('bad request', { status: 400 }));
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('bad request', { status: 400 }));
 
     const { embedDocuments } = await import('./embeddings');
     const promise = embedDocuments(['hello']).catch((e: unknown) => e);

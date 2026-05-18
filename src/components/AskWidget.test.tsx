@@ -65,7 +65,7 @@ describe('AskWidget — error response surfaces error UI and reset button', () =
       new Response(JSON.stringify({ message: 'retrieval failed' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
-      }),
+      })
     );
 
     render(<AskWidget />);

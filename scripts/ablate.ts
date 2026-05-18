@@ -62,13 +62,29 @@ async function main() {
     const tRerank = Date.now();
     const reranked =
       candidates.value.length > 0
-        ? await rerank(item.question, candidates.value.map((c) => c.content), 8)
+        ? await rerank(
+            item.question,
+            candidates.value.map((c) => c.content),
+            8
+          )
         : [];
     const hybridLatency = candidates.latency + (Date.now() - tRerank);
     const rerankedIds = reranked.map((r) => candidates.value[r.index].id);
 
-    record(grid, 'vector-only top-5', item, vec5.value.map((r) => r.id), vec5.latency);
-    record(grid, 'fts-only top-5', item, fts5.value.map((r) => r.id), fts5.latency);
+    record(
+      grid,
+      'vector-only top-5',
+      item,
+      vec5.value.map((r) => r.id),
+      vec5.latency
+    );
+    record(
+      grid,
+      'fts-only top-5',
+      item,
+      fts5.value.map((r) => r.id),
+      fts5.latency
+    );
     record(grid, 'hybrid+rerank top-3', item, rerankedIds.slice(0, 3), hybridLatency);
     record(grid, 'hybrid+rerank top-5', item, rerankedIds.slice(0, 5), hybridLatency);
     record(grid, 'hybrid+rerank top-8', item, rerankedIds.slice(0, 8), hybridLatency);
@@ -101,10 +117,7 @@ async function timed<T>(fn: () => Promise<T>): Promise<{ value: T; latency: numb
   return { value, latency: Date.now() - t0 };
 }
 
-function printPerQuery(
-  golden: GoldenItem[],
-  grid: Record<ModeName, Record<string, RunResult>>
-) {
+function printPerQuery(golden: GoldenItem[], grid: Record<ModeName, Record<string, RunResult>>) {
   console.log('\n=== Recall@K per query ===\n');
   const header = [pad('query', 24), ...MODE_NAMES.map((m) => pad(m, 22))].join(' ');
   console.log(header);
@@ -120,10 +133,7 @@ function printPerQuery(
   }
 }
 
-function printAggregates(
-  golden: GoldenItem[],
-  grid: Record<ModeName, Record<string, RunResult>>
-) {
+function printAggregates(golden: GoldenItem[], grid: Record<ModeName, Record<string, RunResult>>) {
   console.log('\n=== Aggregates ===\n');
   console.log(pad('mode', 28) + pad('mean recall', 15) + pad('p50 latency', 15) + 'p95 latency');
   console.log('-'.repeat(70));
@@ -140,10 +150,7 @@ function printAggregates(
   }
 }
 
-function printMisses(
-  golden: GoldenItem[],
-  grid: Record<ModeName, Record<string, RunResult>>
-) {
+function printMisses(golden: GoldenItem[], grid: Record<ModeName, Record<string, RunResult>>) {
   console.log('\n=== Misses on hybrid+rerank top-5 ===\n');
   for (const item of golden) {
     const cell = grid['hybrid+rerank top-5'][item.id];

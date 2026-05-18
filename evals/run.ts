@@ -57,9 +57,7 @@ async function main(): Promise<void> {
     version: '1.0';
     items: Array<{ question: string; category: Category }>;
   };
-  const subset = onlyCategory
-    ? golden.items.filter((i) => i.category === onlyCategory)
-    : golden.items;
+  const subset = onlyCategory ? golden.items.filter((i) => i.category === onlyCategory) : golden.items;
   const items = limit ? subset.slice(0, limit) : subset;
 
   console.log(`Eval: ${items.length} items · model: ${ANSWER_MODEL}\n`);
@@ -86,9 +84,7 @@ async function main(): Promise<void> {
     },
     onItem: (e) => {
       if (e.type === 'start') {
-        process.stdout.write(
-          `  [${pad(e.index + 1, 2, 'start')}/${e.total}] ${pad(e.item.id, 30)} `,
-        );
+        process.stdout.write(`  [${pad(e.index + 1, 2, 'start')}/${e.total}] ${pad(e.item.id, 30)} `);
       } else if (e.type === 'pass') {
         console.log(`✓ (${e.result.timings.totalMs}ms)`);
       } else if (e.type === 'fail') {
@@ -120,7 +116,7 @@ async function main(): Promise<void> {
       pad(cat, 16) +
         pad(`${e.passed}/${e.total} (${pct}%)`, 18) +
         pad(`${p50(e.latencies)}ms`, 10) +
-        `${p95(e.latencies)}ms`,
+        `${p95(e.latencies)}ms`
     );
   }
   const totalPass = report.results.filter((r) => r.pass).length;
@@ -144,9 +140,7 @@ async function main(): Promise<void> {
         console.log(`  - check ${c.name} failed${detail}`);
       }
       if (r.judgment !== null && r.judgment.appropriate !== 'yes') {
-        console.log(
-          `  - judge appropriate=${r.judgment.appropriate}: ${r.judgment.reason}`,
-        );
+        console.log(`  - judge appropriate=${r.judgment.appropriate}: ${r.judgment.reason}`);
       }
       if (r.judgment !== null && r.judgment.grounded === 'no') {
         console.log(`  - judge grounded=no`);
@@ -164,7 +158,7 @@ async function main(): Promise<void> {
   const passRate = totalPass / report.results.length;
   if (passRate < threshold) {
     throw new Error(
-      `Pass rate ${(passRate * 100).toFixed(1)}% below threshold ${(threshold * 100).toFixed(0)}%`,
+      `Pass rate ${(passRate * 100).toFixed(1)}% below threshold ${(threshold * 100).toFixed(0)}%`
     );
   }
 }

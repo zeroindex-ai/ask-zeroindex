@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildCitation,
-  flushBuffer,
-  parseDelta,
-  type ParserState,
-} from './citationParser';
+import { buildCitation, flushBuffer, parseDelta, type ParserState } from './citationParser';
 import type { RetrievedChunk } from './types';
 
 const baseChunk: RetrievedChunk = {

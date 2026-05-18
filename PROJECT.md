@@ -21,16 +21,16 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 
 ### Why this project
 
-`ask-zeroindex` makes the zeroindex.ai site interactive: visitors can ask about services, pricing, principles, or background and get answers grounded in the site's own content rather than hunting through sections. It also exercises a full production RAG stack end-to-end — embeddings, hybrid retrieval, reranking, streaming, eval-driven prompt development. The widget doubles as an honest stress test of the site copy: if Claude can't answer *"what's your pricing?"* from the page, the page doesn't either.
+`ask-zeroindex` makes the zeroindex.ai site interactive: visitors can ask about services, pricing, principles, or background and get answers grounded in the site's own content rather than hunting through sections. It also exercises a full production RAG stack end-to-end — embeddings, hybrid retrieval, reranking, streaming, eval-driven prompt development. The widget doubles as an honest stress test of the site copy: if Claude can't answer _"what's your pricing?"_ from the page, the page doesn't either.
 
 ### Goals & success criteria
 
-| Goal | Metric | Status |
-|---|---|---|
-| RAG pipeline working end-to-end | Single test query returns grounded answer with citations | ✅ (2026-05-05) |
-| 30 golden Q/A baseline | ≥ 80% pass rate on LLM-as-judge | ✅ 90% baseline locked in `eval-baselines.md` |
-| First-token latency | p50 < 2s, p95 < 4s | ⏳ open — current 3.8s |
-| Widget live on `zeroindex.ai` | Visitors can ask + get answers | ✅ shipped at `ask.zeroindex.ai`, embedded on the site |
+| Goal                            | Metric                                                   | Status                                                 |
+| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| RAG pipeline working end-to-end | Single test query returns grounded answer with citations | ✅ (2026-05-05)                                        |
+| 30 golden Q/A baseline          | ≥ 80% pass rate on LLM-as-judge                          | ✅ 90% baseline locked in `eval-baselines.md`          |
+| First-token latency             | p50 < 2s, p95 < 4s                                       | ⏳ open — current 3.8s                                 |
+| Widget live on `zeroindex.ai`   | Visitors can ask + get answers                           | ✅ shipped at `ask.zeroindex.ai`, embedded on the site |
 
 ### Out of scope (v1)
 
@@ -45,43 +45,43 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 
 ## 2. Strategic decisions log
 
-Load-bearing decisions, documented because the *why* often outlasts the *what*.
+Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 
 ### Stack picks
 
-| Decision | Choice | Reasoning |
-|---|---|---|
-| **Framework** | Next.js 16 (App Router, src dir, TS, Turbopack default) | Mature SSR/edge story, free Vercel deploy, App Router's streaming primitives align with SSE answer flow. Was scaffolded with `create-next-app` so no opinionated layer added. |
-| **Storage** | Turso (libsql) — vector + FTS in one DB | SQLite-compatible (familiar), native `F32_BLOB(N)` + `vector_top_k()` (no sqlite-vec extension needed), native FTS5 for BM25. Free tier easily covers this scale. |
-| **Embeddings** | Voyage-3 (1024 dim) | Better retrieval quality than OpenAI text-embedding-3-small in published benchmarks. Free tier: 200M tokens. |
-| **Reranking** | Voyage rerank-2.5 | Same vendor relationship; designed to pair with Voyage-3 embeddings; meaningful precision lift over raw vector or BM25 alone. |
-| **LLM** | Claude Sonnet 4.6 | Primary model commitment for ZeroIndex consultancy; strong RAG quality at moderate cost ($3/M in, $15/M out); prompt caching well-supported. |
-| **HTML parser** | cheerio | Mature, jQuery-like API, fast enough for static HTML ingest. |
-| **Validation** | Zod 4 | TypeScript-first schema validation, used at the API boundary in `route.ts`. |
-| **Package manager** | pnpm 10 | Faster + disk-efficient. Same package manager as the `mcp-pack` monorepo — consistency across the `@zeroindex-ai/*` ecosystem. |
-| **Node** | 24 LTS via nvm | Current LTS; required by Next 16 (≥ 20.9). |
+| Decision            | Choice                                                  | Reasoning                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Framework**       | Next.js 16 (App Router, src dir, TS, Turbopack default) | Mature SSR/edge story, free Vercel deploy, App Router's streaming primitives align with SSE answer flow. Was scaffolded with `create-next-app` so no opinionated layer added. |
+| **Storage**         | Turso (libsql) — vector + FTS in one DB                 | SQLite-compatible (familiar), native `F32_BLOB(N)` + `vector_top_k()` (no sqlite-vec extension needed), native FTS5 for BM25. Free tier easily covers this scale.             |
+| **Embeddings**      | Voyage-3 (1024 dim)                                     | Better retrieval quality than OpenAI text-embedding-3-small in published benchmarks. Free tier: 200M tokens.                                                                  |
+| **Reranking**       | Voyage rerank-2.5                                       | Same vendor relationship; designed to pair with Voyage-3 embeddings; meaningful precision lift over raw vector or BM25 alone.                                                 |
+| **LLM**             | Claude Sonnet 4.6                                       | Primary model commitment for ZeroIndex consultancy; strong RAG quality at moderate cost ($3/M in, $15/M out); prompt caching well-supported.                                  |
+| **HTML parser**     | cheerio                                                 | Mature, jQuery-like API, fast enough for static HTML ingest.                                                                                                                  |
+| **Validation**      | Zod 4                                                   | TypeScript-first schema validation, used at the API boundary in `route.ts`.                                                                                                   |
+| **Package manager** | pnpm 10                                                 | Faster + disk-efficient. Same package manager as the `mcp-pack` monorepo — consistency across the `@zeroindex-ai/*` ecosystem.                                                |
+| **Node**            | 24 LTS via nvm                                          | Current LTS; required by Next 16 (≥ 20.9).                                                                                                                                    |
 
 ### Things deliberately NOT chosen
 
-| Avoided | Why |
-|---|---|
-| Pinecone / Weaviate / Qdrant | Operational complexity. Turso wins on simplicity for this scale (low tens of thousands of chunks). Revisit if multi-tenant or > 1M chunks. |
-| OpenAI text-embedding-3 | Published benchmarks favor Voyage-3 for retrieval. Single-vendor diversification away from OpenAI is also a small but real value. |
-| LangChain / LlamaIndex | The pipeline here is short — embed, store, retrieve, prompt. Pulling in a heavy framework would obscure what's happening. Hand-rolled wins on transparency for a learning-oriented project. |
-| Pages Router | App Router is where Next.js momentum lives; Streaming SSE works cleanly with the new Response patterns. |
-| React Server Components for the widget | Widget is interactive (input, streaming output) — a client component is the right primitive. |
-| Voyage Node SDK | The REST API is 4 endpoints with simple JSON shapes — a thin fetch wrapper gives more control over batching and error handling, and zero version-pinning surprises. |
+| Avoided                                | Why                                                                                                                                                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pinecone / Weaviate / Qdrant           | Operational complexity. Turso wins on simplicity for this scale (low tens of thousands of chunks). Revisit if multi-tenant or > 1M chunks.                                                  |
+| OpenAI text-embedding-3                | Published benchmarks favor Voyage-3 for retrieval. Single-vendor diversification away from OpenAI is also a small but real value.                                                           |
+| LangChain / LlamaIndex                 | The pipeline here is short — embed, store, retrieve, prompt. Pulling in a heavy framework would obscure what's happening. Hand-rolled wins on transparency for a learning-oriented project. |
+| Pages Router                           | App Router is where Next.js momentum lives; Streaming SSE works cleanly with the new Response patterns.                                                                                     |
+| React Server Components for the widget | Widget is interactive (input, streaming output) — a client component is the right primitive.                                                                                                |
+| Voyage Node SDK                        | The REST API is 4 endpoints with simple JSON shapes — a thin fetch wrapper gives more control over batching and error handling, and zero version-pinning surprises.                         |
 
 ### Architecture decisions
 
-| Decision | Choice | Reasoning |
-|---|---|---|
-| **Hybrid retrieval** | Vector (top-12) ∪ FTS (top-12) → rerank → top-5 | Vector finds semantic matches; FTS finds exact-keyword/proper-noun matches the embeddings sometimes miss; reranker dedupes and re-scores. Empirically, hybrid + rerank > either alone. |
-| **Chunking** | By section heading (h2), then by h3 if present; 1600-char target, 200-char overlap when oversized | Mirrors human authoring intent. Headings carry semantic boundary signal. Char-based budgeting is good enough for v1; switch to token-counted budgeting if eval shows boundary issues. |
-| **Citations** | `[chunk:N]` markers in the streamed text | Simple format the model already produces; client-side parser substitutes them for rendered citation chips. No structured tool calls needed for this scale. |
-| **Streaming format** | SSE (Server-Sent Events) | Native browser support, works through CDNs cleanly, simpler than WebSockets for one-way streams. Events: `chunks` (id list, sent first) → `text` (deltas) → `done`. |
-| **Prompt caching** | Cache `system` + retrieved `context` (`cache_control: { type: 'ephemeral' }`) | Visitor questions vary; the system prompt and recent retrieved chunks are reusable across nearby requests. Real cost driver. |
-| **Re-ingest model** | Drop and rebuild (not incremental) | At ~22 chunks per ingest of `zeroindex.ai`, full reingest takes seconds. Not worth incremental complexity until content scale justifies. |
+| Decision             | Choice                                                                                            | Reasoning                                                                                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hybrid retrieval** | Vector (top-12) ∪ FTS (top-12) → rerank → top-5                                                   | Vector finds semantic matches; FTS finds exact-keyword/proper-noun matches the embeddings sometimes miss; reranker dedupes and re-scores. Empirically, hybrid + rerank > either alone. |
+| **Chunking**         | By section heading (h2), then by h3 if present; 1600-char target, 200-char overlap when oversized | Mirrors human authoring intent. Headings carry semantic boundary signal. Char-based budgeting is good enough for v1; switch to token-counted budgeting if eval shows boundary issues.  |
+| **Citations**        | `[chunk:N]` markers in the streamed text                                                          | Simple format the model already produces; client-side parser substitutes them for rendered citation chips. No structured tool calls needed for this scale.                             |
+| **Streaming format** | SSE (Server-Sent Events)                                                                          | Native browser support, works through CDNs cleanly, simpler than WebSockets for one-way streams. Events: `chunks` (id list, sent first) → `text` (deltas) → `done`.                    |
+| **Prompt caching**   | Cache `system` + retrieved `context` (`cache_control: { type: 'ephemeral' }`)                     | Visitor questions vary; the system prompt and recent retrieved chunks are reusable across nearby requests. Real cost driver.                                                           |
+| **Re-ingest model**  | Drop and rebuild (not incremental)                                                                | At ~22 chunks per ingest of `zeroindex.ai`, full reingest takes seconds. Not worth incremental complexity until content scale justifies.                                               |
 
 ---
 
@@ -427,7 +427,7 @@ After 2 trivial label fixes (post-baseline-run), the same prompt scores **29/30 
 
 **Cache investigation (deferred):**
 
-Spent ~90 min isolating cache behavior in `scripts/cache-repro.ts`. Single-block requests cache cleanly; our two-block (system + context) shape triggers an asymmetric pattern where `cache_creation_input_tokens` fires every call but `cache_read_input_tokens` is never set — net cost was 25% *worse* than no caching. Could not isolate the trigger (candidates: `<context>` XML tags, account-level setting, SDK serialization difference). Removed `cache_control` entirely; preconditions to revisit are documented in eval-baselines.md §6.
+Spent ~90 min isolating cache behavior in `scripts/cache-repro.ts`. Single-block requests cache cleanly; our two-block (system + context) shape triggers an asymmetric pattern where `cache_creation_input_tokens` fires every call but `cache_read_input_tokens` is never set — net cost was 25% _worse_ than no caching. Could not isolate the trigger (candidates: `<context>` XML tags, account-level setting, SDK serialization difference). Removed `cache_control` entirely; preconditions to revisit are documented in eval-baselines.md §6.
 
 ### Next
 
@@ -465,9 +465,7 @@ Spent ~90 min isolating cache behavior in `scripts/cache-repro.ts`. Single-block
 Format (`evals/golden-seed.json`):
 
 ```json
-[
-  { "id": "services-list", "question": "...", "must_mention": ["AI"], "must_not_mention": [] }
-]
+[{ "id": "services-list", "question": "...", "must_mention": ["AI"], "must_not_mention": [] }]
 ```
 
 Judging rubric (planned):
@@ -481,15 +479,15 @@ Pass = all 4 dimensions pass for a given question. Aggregate target: ≥ 80%.
 
 ### Latency budget
 
-| Stage | p50 target | p95 target |
-|---|---|---|
-| Vector embed (query) | 200 ms | 500 ms |
-| Vector + FTS retrieval | 300 ms | 800 ms |
-| Rerank | 400 ms | 800 ms |
-| Sub-total (retrieval) | < 1.0 s | < 2.0 s |
-| First token from Claude | < 1.0 s | < 2.0 s |
-| First token to user | **< 2 s** | **< 4 s** |
-| Full answer (≈ 200 tokens) | < 5 s | < 8 s |
+| Stage                      | p50 target | p95 target |
+| -------------------------- | ---------- | ---------- |
+| Vector embed (query)       | 200 ms     | 500 ms     |
+| Vector + FTS retrieval     | 300 ms     | 800 ms     |
+| Rerank                     | 400 ms     | 800 ms     |
+| Sub-total (retrieval)      | < 1.0 s    | < 2.0 s    |
+| First token from Claude    | < 1.0 s    | < 2.0 s    |
+| First token to user        | **< 2 s**  | **< 4 s**  |
+| Full answer (≈ 200 tokens) | < 5 s      | < 8 s      |
 
 Current measured (initial baseline, single sample): retrieval 2.5s, first token 3.8s, total 7.0s. Retrieval is over budget — likely the rerank network hop. Tuned in the later retrieval ablation (see §11).
 
@@ -514,10 +512,10 @@ Region: `iad1` (us-east-1) to match Turso region — keeps DB roundtrip latency 
 
 The website lives at `zeroindex-ai/zeroindexai` and deploys to Cloudflare Workers. Two integration options:
 
-| Option | Pros | Cons |
-|---|---|---|
-| **Embed snippet** — `<script>` tag pointing at a Vercel-hosted JS bundle that injects an iframe or shadow DOM widget | Decouples deploy cycles; widget bundle independently versioned; doesn't touch website Worker | Cross-origin; CSS isolation work; iframe has sizing quirks |
-| **Inline component** — write the widget directly into the website HTML, fetch from `ask.zeroindex.ai/api/ask` | Tighter visual integration; full CSS control; same-origin if subdomain is set up | Couples widget releases to website releases; fetch from Cloudflare Worker → Vercel needs CORS allowlist |
+| Option                                                                                                               | Pros                                                                                         | Cons                                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Embed snippet** — `<script>` tag pointing at a Vercel-hosted JS bundle that injects an iframe or shadow DOM widget | Decouples deploy cycles; widget bundle independently versioned; doesn't touch website Worker | Cross-origin; CSS isolation work; iframe has sizing quirks                                              |
+| **Inline component** — write the widget directly into the website HTML, fetch from `ask.zeroindex.ai/api/ask`        | Tighter visual integration; full CSS control; same-origin if subdomain is set up             | Couples widget releases to website releases; fetch from Cloudflare Worker → Vercel needs CORS allowlist |
 
 **Shipped:** iframe served from `ask.zeroindex.ai` (CNAME to the Vercel deploy) embedded on `zeroindex.ai` between FAQ and Contact, with postMessage-driven auto-resize. CORS allowlist scoped to the marketing domain.
 
@@ -563,13 +561,13 @@ pnpm eval                                 # 30-query LLM-as-judge
 
 ### Environment variables
 
-| Var | Source | Purpose |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | console.anthropic.com/settings/keys | Claude Sonnet 4.6 messages API |
-| `VOYAGE_API_KEY` | dash.voyageai.com → API Keys | Embeddings + reranker |
-| `TURSO_DATABASE_URL` | `turso db show ask-zeroindex --url` | libsql HTTP endpoint |
-| `TURSO_AUTH_TOKEN` | `turso db tokens create ask-zeroindex --expiration none` | DB auth |
-| `INGEST_SOURCE` (optional) | path to alternate HTML file | Default: `../zeroindexai/index.html` |
+| Var                        | Source                                                   | Purpose                              |
+| -------------------------- | -------------------------------------------------------- | ------------------------------------ |
+| `ANTHROPIC_API_KEY`        | console.anthropic.com/settings/keys                      | Claude Sonnet 4.6 messages API       |
+| `VOYAGE_API_KEY`           | dash.voyageai.com → API Keys                             | Embeddings + reranker                |
+| `TURSO_DATABASE_URL`       | `turso db show ask-zeroindex --url`                      | libsql HTTP endpoint                 |
+| `TURSO_AUTH_TOKEN`         | `turso db tokens create ask-zeroindex --expiration none` | DB auth                              |
+| `INGEST_SOURCE` (optional) | path to alternate HTML file                              | Default: `../zeroindexai/index.html` |
 
 ### CI / GitHub Actions secrets
 
@@ -611,26 +609,26 @@ Verify with `gh secret list`. The workflow points at the **production** Turso DB
 
 ### Common issues
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| `fts5: syntax error near "?"` | libsql FTS5 doesn't bind `?` in MATCH | Already worked around — `sanitizeFtsQuery` interpolates inline |
-| Anthropic 400 "credit balance too low" | Pro subscription ≠ API credits | Add credits at console.anthropic.com/settings/billing |
-| `location 'iad' is not valid` | Turso changed location codes to AWS-style | Use `aws-us-east-1` (or omit `--location`, it's default) |
-| `turso auth whoami` says not logged in after signup | Browser flow didn't return to terminal cleanly | Run `turso auth login`, stay in terminal until "Success" |
+| Symptom                                                | Cause                                           | Fix                                                                                                                                                   |
+| ------------------------------------------------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fts5: syntax error near "?"`                          | libsql FTS5 doesn't bind `?` in MATCH           | Already worked around — `sanitizeFtsQuery` interpolates inline                                                                                        |
+| Anthropic 400 "credit balance too low"                 | Pro subscription ≠ API credits                  | Add credits at console.anthropic.com/settings/billing                                                                                                 |
+| `location 'iad' is not valid`                          | Turso changed location codes to AWS-style       | Use `aws-us-east-1` (or omit `--location`, it's default)                                                                                              |
+| `turso auth whoami` says not logged in after signup    | Browser flow didn't return to terminal cleanly  | Run `turso auth login`, stay in terminal until "Success"                                                                                              |
 | First push to GitHub: `GH007 publishing private email` | git author email is your private personal email | One-time: rewrite history with `git filter-branch` to use noreply email; set `git config --global user.email "<id>+<login>@users.noreply.github.com"` |
 
 ---
 
 ## 11. Decision log (running)
 
-| Date | Decision | Why |
-|---|---|---|
-| 2026-05-03 | Stack: Next + Turso + Voyage + Sonnet 4.6 | Each picked deliberately to balance production readiness with new-territory experience |
-| 2026-05-03 | Public repo from day 1 | Repository visibility from scaffold to ship; commits via GitHub noreply email to avoid address leakage |
-| 2026-05-05 | Drop-and-rebuild ingest pattern (vs. incremental) | 22 chunks at this scale; full reingest is seconds; not worth incremental complexity |
-| 2026-05-05 | FTS query: sanitize + inline (not parameter-bound) | libsql FTS5 binding limitation; sanitization makes inline interpolation injection-safe |
-| 2026-05-06 | Server-side streaming citation parser (vs. client-side rendering of raw markers) | Cleaner UX: text events arrive without `[chunk:N]` clutter; citation events arrive structured. Server-side is the right place because we already have the chunk list in scope. |
-| 2026-05-06 | Retrieval failure → HTTP 502 (not half-opened SSE error event) | If retrieval fails before the stream opens, a normal HTTP error is more idiomatic and easier for clients to handle than opening an SSE stream just to send a single error frame. |
+| Date       | Decision                                                                         | Why                                                                                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-03 | Stack: Next + Turso + Voyage + Sonnet 4.6                                        | Each picked deliberately to balance production readiness with new-territory experience                                                                                           |
+| 2026-05-03 | Public repo from day 1                                                           | Repository visibility from scaffold to ship; commits via GitHub noreply email to avoid address leakage                                                                           |
+| 2026-05-05 | Drop-and-rebuild ingest pattern (vs. incremental)                                | 22 chunks at this scale; full reingest is seconds; not worth incremental complexity                                                                                              |
+| 2026-05-05 | FTS query: sanitize + inline (not parameter-bound)                               | libsql FTS5 binding limitation; sanitization makes inline interpolation injection-safe                                                                                           |
+| 2026-05-06 | Server-side streaming citation parser (vs. client-side rendering of raw markers) | Cleaner UX: text events arrive without `[chunk:N]` clutter; citation events arrive structured. Server-side is the right place because we already have the chunk list in scope.   |
+| 2026-05-06 | Retrieval failure → HTTP 502 (not half-opened SSE error event)                   | If retrieval fails before the stream opens, a normal HTTP error is more idiomatic and easier for clients to handle than opening an SSE stream just to send a single error frame. |
 
 ---
 

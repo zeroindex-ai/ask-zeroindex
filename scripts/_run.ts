@@ -12,8 +12,7 @@ export function runMain(fn: () => Promise<unknown>): void {
     .finally(closeDb);
 }
 
-export const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Voyage free tier: 3 RPM. Set to 0 once payment method is added.
 export const RERANK_THROTTLE_MS = Number(process.env.RERANK_THROTTLE_MS ?? 21_000);

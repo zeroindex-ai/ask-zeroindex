@@ -53,9 +53,6 @@ async function sendToTracePack(url: string, token: string, body: string): Promis
       keepalive: true,
     });
   } catch (err) {
-    console.warn(
-      'trace-pack ingest failed:',
-      err instanceof Error ? err.message : String(err)
-    );
+    console.warn('trace-pack ingest failed:', err instanceof Error ? err.message : String(err));
   }
 }
