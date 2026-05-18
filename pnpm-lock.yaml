@@ -60,8 +60,8 @@ importers:
         specifier: ^4.1.5
         version: 4.1.5(vitest@4.1.5)
       '@zeroindex-ai/eval-pack':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.2.0
+        version: 0.2.0(@anthropic-ai/sdk@0.95.1(zod@4.4.2))
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.7.0)
@@ -1200,10 +1200,15 @@ packages:
   '@vitest/utils@4.1.5':
     resolution: {integrity: sha512-76wdkrmfXfqGjueGgnb45ITPyUi1ycZ4IHgC2bhPDUfWHklY/q3MdLOAB+TF1e6xfl8NxNY0ZYaPCFNWSsw3Ug==}
 
-  '@zeroindex-ai/eval-pack@0.1.1':
-    resolution: {integrity: sha512-gHkB3u+I7Rv00nCSK8r2HTHEq09DoI2VtS7LNSP5wMcqITXUIg/EuDWRofj6XLZM2wb9TB8odNLFvgByHvCcGw==}
+  '@zeroindex-ai/eval-pack@0.2.0':
+    resolution: {integrity: sha512-fiUiMKEMXWZV9JGTi5xVuBb6+G8rGh9biqQRRePxvKJGvKNW6DAMUQT0JZ3GuxwTXotBBn4ZKT3TYuzCpDLvTQ==}
     engines: {node: '>=20'}
     hasBin: true
+    peerDependencies:
+      '@anthropic-ai/sdk': ^0.95.0
+    peerDependenciesMeta:
+      '@anthropic-ai/sdk':
+        optional: true
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3851,10 +3856,11 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@zeroindex-ai/eval-pack@0.1.1':
+  '@zeroindex-ai/eval-pack@0.2.0(@anthropic-ai/sdk@0.95.1(zod@4.4.2))':
     dependencies:
-      '@anthropic-ai/sdk': 0.95.1(zod@4.4.2)
       zod: 4.4.2
+    optionalDependencies:
+      '@anthropic-ai/sdk': 0.95.1(zod@4.4.2)
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
