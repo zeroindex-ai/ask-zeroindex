@@ -84,6 +84,11 @@ export async function checkRateLimit(key: string, opts: RateLimitOptions = {}): 
 
   const next = computeNextState(currentTokens, lastUpdated, nowMs, capacity, refillPerSec);
 
+  // NOTE: this read-modify-write is not atomic. Two concurrent requests for the
+  // same key can both read the same `currentTokens` and both pass before either
+  // writes back (a TOCTOU race), letting a burst slightly exceed capacity.
+  // Accepted for this threat model: this is a budget guard, not a security
+  // control, so a small over-count under contention is fine.
   await conn.execute({
     sql: `
       INSERT INTO rate_limit_buckets (key, tokens, updated_at)
