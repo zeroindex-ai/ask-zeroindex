@@ -37,7 +37,8 @@ describe('encodeSSE', () => {
     const str = new TextDecoder().decode(bytes);
     expect(str.startsWith('event: citation\ndata: ')).toBe(true);
     expect(str.endsWith('\n\n')).toBe(true);
-    expect(JSON.parse(str.split('data: ')[1].trim())).toEqual({
+    // The encoded frame always contains a 'data: ' segment, so [1] is present.
+    expect(JSON.parse(str.split('data: ')[1]!.trim())).toEqual({
       chunkId: 7,
       sourcePath: '/x',
       section: 'A',

@@ -37,7 +37,8 @@ async function main() {
       max_tokens: 5,
       messages: [{ role: 'user', content: 'Say "ok" and nothing else.' }],
     });
-    const text = m.content[0].type === 'text' ? m.content[0].text : '';
+    const block = m.content[0];
+    const text = block?.type === 'text' ? block.text : '';
     results.push([
       'Anthropic',
       text.toLowerCase().includes('ok') ? `OK (${text.trim()})` : `FAIL: got "${text}"`,

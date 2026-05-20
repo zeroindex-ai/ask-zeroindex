@@ -83,7 +83,8 @@ describe('hybridSearch', () => {
     const result = await hybridSearch('test query');
 
     // Rerank received the 3 unique candidates (id 2 deduped)
-    const rerankCall = vi.mocked(rerank).mock.calls[0];
+    // rerank was called exactly once above, so calls[0] is present.
+    const rerankCall = vi.mocked(rerank).mock.calls[0]!;
     expect(rerankCall[1]).toHaveLength(3);
 
     // Result has 3 items, all marked as 'rerank' source
@@ -114,8 +115,9 @@ describe('hybridSearch', () => {
 
     const result = await hybridSearch('q');
     expect(result.map((r) => r.id)).toEqual([20, 10]);
-    expect(result[0].score).toBe(0.99);
-    expect(result[1].score).toBe(0.5);
+    // result has exactly 2 items per the assertion above.
+    expect(result[0]!.score).toBe(0.99);
+    expect(result[1]!.score).toBe(0.5);
   });
 
   it('returns empty array when retrieval finds nothing (skips rerank)', async () => {

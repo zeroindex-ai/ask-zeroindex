@@ -69,7 +69,9 @@ async function main() {
           )
         : [];
     const hybridLatency = candidates.latency + (Date.now() - tRerank);
-    const rerankedIds = reranked.map((r) => candidates.value[r.index].id);
+    const rerankedIds = reranked
+      .map((r) => candidates.value[r.index]?.id)
+      .filter((id): id is number => id !== undefined);
 
     record(
       grid,
@@ -117,6 +119,18 @@ async function timed<T>(fn: () => Promise<T>): Promise<{ value: T; latency: numb
   return { value, latency: Date.now() - t0 };
 }
 
+// The main loop calls record() for every mode × item before any reader runs,
+// so the cell is always present. Centralize the lookup + invariant check.
+function cellOf(
+  grid: Record<ModeName, Record<string, RunResult>>,
+  mode: ModeName,
+  id: string
+): RunResult {
+  const cell = grid[mode][id];
+  if (!cell) throw new Error(`missing ablation cell for ${mode}/${id}`);
+  return cell;
+}
+
 function printPerQuery(golden: GoldenItem[], grid: Record<ModeName, Record<string, RunResult>>) {
   console.log('\n=== Recall@K per query ===\n');
   const header = [pad('query', 24), ...MODE_NAMES.map((m) => pad(m, 22))].join(' ');
@@ -125,7 +139,7 @@ function printPerQuery(golden: GoldenItem[], grid: Record<ModeName, Record<strin
   for (const item of golden) {
     const row = [pad(item.id, 24)];
     for (const mode of MODE_NAMES) {
-      const { recall } = grid[mode][item.id];
+      const { recall } = cellOf(grid, mode, item.id);
       const tag = recall === 1 ? '✓' : recall === 0 ? '✗' : '~';
       row.push(pad(`${tag} ${(recall * 100).toFixed(0)}%`, 22));
     }
@@ -138,7 +152,7 @@ function printAggregates(golden: GoldenItem[], grid: Record<ModeName, Record<str
   console.log(pad('mode', 28) + pad('mean recall', 15) + pad('p50 latency', 15) + 'p95 latency');
   console.log('-'.repeat(70));
   for (const mode of MODE_NAMES) {
-    const cells = golden.map((item) => grid[mode][item.id]);
+    const cells = golden.map((item) => cellOf(grid, mode, item.id));
     const meanRecall = cells.reduce((a, c) => a + c.recall, 0) / cells.length;
     const latencies = cells.map((c) => c.latency);
     console.log(
@@ -153,7 +167,7 @@ function printAggregates(golden: GoldenItem[], grid: Record<ModeName, Record<str
 function printMisses(golden: GoldenItem[], grid: Record<ModeName, Record<string, RunResult>>) {
   console.log('\n=== Misses on hybrid+rerank top-5 ===\n');
   for (const item of golden) {
-    const cell = grid['hybrid+rerank top-5'][item.id];
+    const cell = cellOf(grid, 'hybrid+rerank top-5', item.id);
     const cellIdSet = new Set(cell.ids.map(String));
     const missed = item.relevant_refs.filter((ref) => !cellIdSet.has(ref));
     if (missed.length > 0) {

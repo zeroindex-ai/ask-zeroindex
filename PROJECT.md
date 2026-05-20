@@ -31,6 +31,7 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 | 30 golden Q/A baseline          | ≥ 80% pass rate on LLM-as-judge                          | ✅ 90% baseline locked in `eval-baselines.md`          |
 | First-token latency             | p50 < 2s, p95 < 4s                                       | ⏳ open — current 3.8s                                 |
 | Widget live on `zeroindex.ai`   | Visitors can ask + get answers                           | ✅ shipped at `ask.zeroindex.ai`, embedded on the site |
+| Abuse protection on the public endpoint | Per-IP rate limiting before any paid-API work    | ✅ Turso-backed token bucket in `src/lib/rateLimit.ts` |
 
 ### Out of scope (v1)
 
@@ -39,7 +40,6 @@ The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippe
 - Voice / multimodal input
 - Real-time content sync (re-ingest on site change is manual via `pnpm ingest`)
 - Multi-language support (English only)
-- Rate limiting at the widget level (Vercel free-tier abuse protection only)
 
 ---
 

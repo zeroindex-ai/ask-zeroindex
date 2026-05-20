@@ -117,10 +117,10 @@ async function main() {
   const tx = await c.transaction('write');
   try {
     await tx.execute('DELETE FROM chunks');
-    for (let i = 0; i < chunks.length; i++) {
+    for (const [i, chunk] of chunks.entries()) {
       await tx.execute({
         sql: 'INSERT INTO chunks (source_path, section, content, embedding) VALUES (?, ?, ?, vector32(?))',
-        args: [chunks[i].sourcePath, chunks[i].section, chunks[i].content, JSON.stringify(embeddings[i])],
+        args: [chunk.sourcePath, chunk.section, chunk.content, JSON.stringify(embeddings[i])],
       });
     }
     await tx.execute(`INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild')`);

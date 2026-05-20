@@ -40,7 +40,9 @@ export function parseDelta(delta: string, state: ParserState): { text: string; c
   let match: RegExpExecArray | null;
   while ((match = markerRegex.exec(state.buffer)) !== null) {
     textOut += state.buffer.slice(lastIndex, match.index);
-    cited.push(parseInt(match[1], 10));
+    // Group 1 (\d+) is mandatory in the regex, so a successful match always
+    // captures it. Non-null assertion is safe here.
+    cited.push(parseInt(match[1]!, 10));
     lastIndex = match.index + match[0].length;
   }
 

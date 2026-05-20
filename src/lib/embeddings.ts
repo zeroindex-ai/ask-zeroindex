@@ -80,6 +80,9 @@ export async function embedQuery(text: string): Promise<number[]> {
   const cached = _queryEmbedCache.get(text);
   if (cached) return cached;
   const [vector] = await embed([text], 'query');
+  // embed() returns one vector per input; we passed exactly one text, so the
+  // first element is always present. Guard for type-narrowing regardless.
+  if (!vector) throw new Error('Voyage returned no embedding for query');
   _writeCache(text, vector);
   return vector;
 }
@@ -90,9 +93,19 @@ export async function embedQueries(texts: string[]): Promise<number[][]> {
   const uncached = Array.from(new Set(texts.filter((t) => !_queryEmbedCache.has(t))));
   if (uncached.length > 0) {
     const fresh = await embed(uncached, 'query');
-    uncached.forEach((t, i) => _writeCache(t, fresh[i]));
+    uncached.forEach((t, i) => {
+      const vector = fresh[i];
+      // embed() returns exactly one vector per input text, index-aligned, so
+      // fresh[i] is always present for every i in uncached. Guard anyway.
+      if (vector) _writeCache(t, vector);
+    });
   }
-  return texts.map((t) => _queryEmbedCache.get(t)!);
+  return texts.map((t) => {
+    const vector = _queryEmbedCache.get(t);
+    // Every text is either pre-cached or written above, so this is populated.
+    if (!vector) throw new Error('Voyage returned no embedding for query');
+    return vector;
+  });
 }
 
 type RerankResponse = {
