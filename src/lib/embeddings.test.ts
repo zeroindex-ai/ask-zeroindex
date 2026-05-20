@@ -78,6 +78,29 @@ describe('Voyage retry policy (via embedDocuments)', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('reorders by response index so embeddings line up with input order', async () => {
+    // Voyage may return items out of order; each carries its input index.
+    // The response below is shuffled (indices 2, 0, 1) with distinct vectors.
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      makeJsonResponse({
+        data: [
+          { embedding: [2], index: 2 },
+          { embedding: [0], index: 0 },
+          { embedding: [1], index: 1 },
+        ],
+        model: 'voyage-3',
+        usage: { total_tokens: 3 },
+      })
+    );
+
+    const { embedDocuments } = await import('./embeddings');
+    const promise = embedDocuments(['a', 'b', 'c']);
+    await vi.runAllTimersAsync();
+    const result = await promise;
+    // Must come back in input order: a→[0], b→[1], c→[2].
+    expect(result).toEqual([[0], [1], [2]]);
+  });
+
   it('retries on TypeError (network failure) and returns the 200 result', async () => {
     fetchSpy = vi
       .spyOn(globalThis, 'fetch')

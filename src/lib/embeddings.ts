@@ -53,7 +53,10 @@ async function embed(texts: string[], inputType: 'document' | 'query'): Promise<
     model: EMBEDDING_MODEL,
     input_type: inputType,
   });
-  return res.data.map((d) => d.embedding);
+  // Voyage returns an `index` per item and does not guarantee response order
+  // matches input order. Sort by index before dropping it, so each embedding
+  // lines up with its source text (and, for embedQueries, its cache write).
+  return [...res.data].sort((a, b) => a.index - b.index).map((d) => d.embedding);
 }
 
 export async function embedDocuments(texts: string[]): Promise<number[][]> {
