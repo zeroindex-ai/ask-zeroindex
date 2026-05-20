@@ -31,11 +31,12 @@ async function subject(question: string) {
   const retrievalMs = Date.now() - t0;
 
   const stream = await answer(question, chunks);
-  let firstTokenMs = 0;
+  // null = "not yet set" sentinel; 0 would collide with a token arriving at t0.
+  let firstTokenMs: number | null = null;
   let text = '';
   for await (const event of stream) {
     if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-      if (firstTokenMs === 0) firstTokenMs = Date.now() - t0;
+      if (firstTokenMs === null) firstTokenMs = Date.now() - t0;
       text += event.delta.text;
     }
   }

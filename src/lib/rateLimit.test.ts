@@ -8,8 +8,12 @@ import {
   BUCKET_REFILL_PER_SEC,
 } from './rateLimit';
 
-// Minimal in-memory stand-in for the libsql client. Only implements the
-// shape checkRateLimit uses: SELECT by key, INSERT … ON CONFLICT … DO UPDATE.
+// Minimal in-memory stand-in for the libsql client. Implements the shape
+// checkRateLimit uses: the atomic INSERT … ON CONFLICT … DO UPDATE … WHERE …
+// RETURNING upsert (with inline refill math), plus the fallback SELECT used on
+// the denied path. The upsert is evaluated synchronously here, mirroring how
+// libsql serializes writes to a single row — that serialization is what closes
+// the TOCTOU race the real SQL relies on.
 type Row = { tokens: number; updated_at: number };
 
 function makeFakeClient(): {
@@ -18,18 +22,39 @@ function makeFakeClient(): {
 } {
   const store = new Map<string, Row>();
   const execute = (async (input: unknown) => {
-    const { sql, args } = input as { sql: string; args: unknown[] };
+    const { sql, args } = input as {
+      sql: string;
+      args: Record<string, unknown> | unknown[];
+    };
+    if (sql.includes('INSERT INTO rate_limit_buckets')) {
+      const a = args as Record<string, unknown>;
+      const key = String(a.key);
+      const capacity = Number(a.capacity);
+      const now = Number(a.now);
+      const refill = Number(a.refill);
+      const existing = store.get(key);
+      if (!existing) {
+        // Insert branch: seed a full bucket, spend one token.
+        const tokens = capacity - 1;
+        store.set(key, { tokens, updated_at: now });
+        return { rows: [{ tokens }] };
+      }
+      // Conflict branch: refill inline, decrement only if refilled >= 1.
+      const refilled = Math.min(capacity, existing.tokens + ((now - existing.updated_at) / 1000) * refill);
+      if (refilled >= 1) {
+        const tokens = refilled - 1;
+        store.set(key, { tokens, updated_at: now });
+        return { rows: [{ tokens }] };
+      }
+      // WHERE failed: no write, no row returned.
+      return { rows: [] };
+    }
     if (sql.includes('SELECT tokens')) {
-      const key = String(args[0]);
+      const key = String((args as unknown[])[0]);
       const row = store.get(key);
       return {
         rows: row ? [{ tokens: row.tokens, updated_at: row.updated_at }] : [],
       };
-    }
-    if (sql.includes('INSERT INTO rate_limit_buckets')) {
-      const [key, tokens, updatedAt] = args as [string, number, number];
-      store.set(key, { tokens, updated_at: updatedAt });
-      return { rows: [] };
     }
     throw new Error(`unexpected sql: ${sql}`);
   }) as unknown as Client['execute'];
@@ -150,5 +175,25 @@ describe('checkRateLimit', () => {
 
   it('uses BUCKET_REFILL_PER_SEC as the documented refill rate', () => {
     expect(BUCKET_REFILL_PER_SEC).toBeCloseTo(10 / 60);
+  });
+
+  it('two concurrent requests at capacity=1 with a frozen clock cannot both consume the last token', async () => {
+    // Frozen clock + zero refill: there is exactly one token. The atomic UPSERT
+    // serializes the two writes on the row, so the first allows and the second
+    // is throttled — the prior read-modify-write would have let both pass.
+    const now = () => 5000;
+    const opts = { now, client: fake.client, capacity: 1, refillPerSec: 0 };
+    const [a, b] = await Promise.all([
+      checkRateLimit('ip:race', opts),
+      checkRateLimit('ip:race', opts),
+    ]);
+
+    const allowed = [a, b].filter((r) => r.allowed);
+    const denied = [a, b].filter((r) => !r.allowed);
+    expect(allowed).toHaveLength(1);
+    expect(denied).toHaveLength(1);
+    for (const r of denied) {
+      if (!r.allowed) expect(r.retryAfterSec).toBeGreaterThanOrEqual(1);
+    }
   });
 });
