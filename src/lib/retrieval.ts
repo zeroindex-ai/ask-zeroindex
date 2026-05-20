@@ -49,7 +49,7 @@ export async function ftsSearch(query: string, limit = FTS_TOP_K): Promise<Retri
              bm25(chunks_fts) AS score
       FROM chunks_fts
       JOIN chunks ON chunks.id = chunks_fts.rowid
-      WHERE chunks_fts MATCH '${ftsQuery.replace(/'/g, "''")}'
+      WHERE chunks_fts MATCH '${ftsQuery.replace(/'/g, "''") /* belt-and-suspenders; sanitizeFtsQuery already strips quotes */}'
       ORDER BY score
       LIMIT ?
     `,
