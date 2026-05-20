@@ -84,9 +84,12 @@ export async function hybridSearch(query: string, topK = RERANK_TOP_K): Promise<
     candidates.map((c) => c.content),
     topK
   );
-  return reranked.map((r) => ({
-    ...candidates[r.index],
-    score: r.score,
-    source: 'rerank' as const,
-  }));
+  // r.index is an index into the documents array we sent the reranker (i.e.
+  // candidates). Bounds-guard rather than trust the upstream response: a
+  // malformed index would otherwise spread `undefined` into the result.
+  return reranked.flatMap((r): RetrievedChunk[] => {
+    const candidate = candidates[r.index];
+    if (!candidate) return [];
+    return [{ ...candidate, score: r.score, source: 'rerank' as const }];
+  });
 }

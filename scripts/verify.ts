@@ -9,10 +9,10 @@ async function main() {
   const c = db();
 
   const count = await c.execute('SELECT COUNT(*) as n FROM chunks');
-  console.log(`chunks table: ${count.rows[0].n} rows`);
+  console.log(`chunks table: ${count.rows[0]?.n} rows`);
 
   const ftsCount = await c.execute('SELECT COUNT(*) as n FROM chunks_fts');
-  console.log(`chunks_fts:   ${ftsCount.rows[0].n} rows`);
+  console.log(`chunks_fts:   ${ftsCount.rows[0]?.n} rows`);
 
   console.log('\n--- first 3 chunks ---');
   const sample = await c.execute(
