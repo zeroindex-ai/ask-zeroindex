@@ -26,6 +26,22 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? '')
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Loud one-time signal: an empty ALLOWED_ORIGINS in production silently falls
+// back to `Access-Control-Allow-Origin: *`. We deliberately keep the open
+// behavior here (the live embedded widget may rely on it and prod config can't
+// be verified from this repo), but a forgotten env var should not be silent.
+// The stronger option a deployer can opt into is fail-closed: reject requests
+// with no configured origins instead of allowing all. Module-level guard so the
+// warning fires at most once, not per request.
+const IS_PRODUCTION =
+  process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production';
+if (ALLOWED_ORIGINS.length === 0 && IS_PRODUCTION) {
+  console.error(
+    '[ask/route] ALLOWED_ORIGINS is unset in production — CORS is wide open ' +
+      '(Access-Control-Allow-Origin: *). Set ALLOWED_ORIGINS to lock down the API.'
+  );
+}
+
 function originAllowed(origin: string | null): boolean {
   if (ALLOWED_ORIGINS.length === 0) return true;
   return ALLOWED_ORIGINS.includes(origin ?? 'null');

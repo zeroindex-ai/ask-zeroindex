@@ -73,33 +73,48 @@ export async function checkRateLimit(key: string, opts: RateLimitOptions = {}): 
   const conn = c();
   const nowMs = now();
 
+  // Single atomic UPSERT — no read-modify-write window. The conflict branch
+  // computes the time-based refill INLINE in SQL and decrements by 1 only when
+  // the refilled value is >= 1 (guarded by the conflict-target WHERE clause).
+  // RETURNING surfaces the resulting token count and whether a row was written,
+  // so allow/deny is derived from one statement. This closes the prior TOCTOU
+  // race: two concurrent same-key requests serialize on the row, so they can
+  // never both consume the last token.
+  //
+  // The refilled value is recomputed identically to computeNextState():
+  //   refilled = MIN(capacity, tokens + (now - updated_at)/1000 * refillPerSec)
+  // The insert branch seeds a full bucket (capacity) then spends one token.
+  const result = await conn.execute({
+    sql: `
+      INSERT INTO rate_limit_buckets (key, tokens, updated_at)
+      VALUES (:key, :capacity - 1, :now)
+      ON CONFLICT(key) DO UPDATE SET
+        tokens = MIN(:capacity, tokens + (:now - updated_at) / 1000.0 * :refill) - 1,
+        updated_at = :now
+      WHERE MIN(:capacity, tokens + (:now - updated_at) / 1000.0 * :refill) >= 1
+      RETURNING tokens
+    `,
+    args: { key, capacity, now: nowMs, refill: refillPerSec },
+  });
+
+  const row = result.rows[0];
+  if (row && row.tokens !== null) {
+    // A row was written (insert, or conditional update that passed the WHERE) —
+    // the request consumed a token and is allowed.
+    return { allowed: true, remaining: Math.max(0, Math.floor(Number(row.tokens))) };
+  }
+
+  // No row returned: the UPDATE's WHERE failed (refilled tokens < 1), so the
+  // bucket is empty. Read the current state to compute an accurate retry-after.
+  // (The denied path does no write, so it cannot itself drain the bucket.)
   const existing = await conn.execute({
     sql: 'SELECT tokens, updated_at FROM rate_limit_buckets WHERE key = ?',
     args: [key],
   });
-
-  const row = existing.rows[0];
-  const currentTokens = row && row.tokens !== null ? Number(row.tokens) : capacity;
-  const lastUpdated = row && row.updated_at !== null ? Number(row.updated_at) : nowMs;
-
+  const stateRow = existing.rows[0];
+  const currentTokens = stateRow && stateRow.tokens !== null ? Number(stateRow.tokens) : capacity;
+  const lastUpdated = stateRow && stateRow.updated_at !== null ? Number(stateRow.updated_at) : nowMs;
   const next = computeNextState(currentTokens, lastUpdated, nowMs, capacity, refillPerSec);
-
-  // NOTE: this read-modify-write is not atomic. Two concurrent requests for the
-  // same key can both read the same `currentTokens` and both pass before either
-  // writes back (a TOCTOU race), letting a burst slightly exceed capacity.
-  // Accepted for this threat model: this is a budget guard, not a security
-  // control, so a small over-count under contention is fine.
-  await conn.execute({
-    sql: `
-      INSERT INTO rate_limit_buckets (key, tokens, updated_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(key) DO UPDATE SET tokens = excluded.tokens, updated_at = excluded.updated_at
-    `,
-    args: [key, next.tokens, nowMs],
-  });
-
-  if (next.allowed) {
-    return { allowed: true, remaining: Math.floor(next.tokens) };
-  }
+  // next.allowed is false here by construction; surface its retry-after.
   return { allowed: false, retryAfterSec: next.retryAfterSec };
 }
