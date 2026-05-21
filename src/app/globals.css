@@ -2,29 +2,160 @@
 
 /* Fonts loaded via <link> in layout.tsx — Tailwind's @import expands first,
    so additional @import rules in CSS are invalid per spec.
-   Token values mirror zeroindex.ai so widget paint stays in lockstep. */
+   Canonical cream tokens + chrome mirror the rest of the ZeroIndex subdomains
+   (see reference-zeroindex-subdomain-layout memory). The Ask chat keeps its
+   warm near-black surface via the scoped `.ask-surface` block below. */
 :root {
-  --accent-1: #7c3aed; /* violet-600, matches zeroindex.ai brand */
-  --muted: #a1a1aa;
-  --muted-2: #8b8d96;
-  --line: #2e2924; /* warm dark border */
-  --line-strong: #3f3930; /* warm dark hover/separator */
+  --bg: #faf9f5;
+  --bg-soft: #f4f3ef;
+  --ink: #18181b;
+  --muted: #52525b;
+  --muted-2: #71717a;
+  --line: #cfc9bd;
+  --line-strong: #9c958a;
+  --accent-1: #7c3aed;
+  --accent-2: #4f46e5;
+  --accent-3: #c026d3;
+  --accent-go: #16a34a;
+  --warn: #b45309;
+  --error: #be123c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: #100d09; /* warm near-black — perceptible warmth without reading brown */
-  color: #ffffff;
-  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    'Inter',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.muted {
+  color: var(--muted);
+}
+.muted-2 {
+  color: var(--muted-2);
+}
+.line {
+  border-color: var(--line);
 }
 
 .label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
+  font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+/* Dark widget surface — the Ask chat keeps its warm near-black card so the
+   dark-on-cream contrast stays deliberate (project_widget_design_intent).
+   Scopes the line/muted tokens to dark values + sets bg/ink, so AskWidget and
+   AskIntro render unchanged whether on the cream standalone page (as a card)
+   or filling the dark embed iframe. */
+.ask-surface {
+  --line: #3f3f46; /* = intake --card-line, so in-card borders match the form */
+  --line-strong: #52525b;
+  --muted: #a1a1aa; /* = intake --card-muted */
+  --muted-2: #8b8d96;
+  --card-ink: #fafaf9; /* intake's soft off-white card text, not pure #fff */
+  background: #18181b; /* = intake --card (neutral near-black), pixel-match the form */
+  color: var(--card-ink);
+}
+
+/* In-card labels (Try asking / Sources) match intake's .field-label text —
+   JetBrains Mono 11px / 0.16em — not the page eyebrow's canonical .label
+   (12px / 0.18em). Text props only; no margin, to avoid shifting spacing. */
+.label-card {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Canonical ZeroIndex subdomain chrome — see reference-zeroindex-subdomain-layout. */
+.site-header {
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+.site-header.scrolled {
+  border-bottom-color: var(--line);
+}
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: opacity 0.15s ease;
+}
+.brand-link:hover {
+  opacity: 0.8;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.subtle {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.subtle:hover {
+  color: var(--ink);
+}
+.inline-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+  transition: opacity 0.15s ease;
+}
+.inline-link:hover {
+  opacity: 0.8;
+}
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 8px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 16px;
+  z-index: 1000;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 8px 8px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid var(--accent-1);
+  outline-offset: 2px;
 }
 
 /* /embed sets this on <html> when loaded inside an iframe. Prevents the iframe's
@@ -34,4 +165,7 @@ body {
 html.no-overflow,
 html.no-overflow body {
   overflow: hidden;
+  /* Match the card so the host's resize BUFFER (a few px taller than the dark
+     .ask-surface main) doesn't expose the cream page body as a seam. */
+  background: #18181b;
 }

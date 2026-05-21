@@ -15,7 +15,7 @@ const SUGGESTED = [
 ];
 
 const PILL_CLASS =
-  'rounded-full border border-[var(--line)] bg-transparent px-3 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent-1)] hover:text-white';
+  'rounded-full border border-[var(--line)] bg-transparent px-3 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent-1)] hover:text-[var(--card-ink)]';
 
 const initialState = {
   question: '',
@@ -176,13 +176,13 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
             aria-label="Ask a question about ZeroIndex"
             rows={2}
             disabled={busy}
-            className="flex-1 resize-none rounded-md border border-[var(--line)] bg-transparent px-3 py-2 text-sm leading-relaxed text-white placeholder:text-[var(--muted-2)] focus:border-[var(--accent-1)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-1)] disabled:opacity-50"
+            className="flex-1 resize-none rounded-lg border border-[var(--line)] bg-transparent px-3.5 py-3 text-sm leading-relaxed placeholder:text-[var(--muted)] focus:border-[var(--accent-1)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-1)] disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={busy || !question.trim()}
             aria-label={busy ? 'Sending' : 'Send question'}
-            className="inline-flex w-20 items-center justify-center rounded-md bg-white px-5 text-sm font-semibold text-black transition-all hover:bg-neutral-200 hover:shadow-[0_8px_24px_-12px_rgba(124,58,237,0.35)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)] focus:ring-offset-2 focus:ring-offset-black disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none"
+            className="inline-flex w-20 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-black transition-all hover:bg-neutral-200 hover:shadow-[0_8px_24px_-12px_rgba(124,58,237,0.35)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)] focus:ring-offset-2 focus:ring-offset-black disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none"
           >
             {busy ? '…' : 'Ask'}
           </button>
@@ -191,7 +191,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
 
       {showEmpty && (
         <div className="space-y-3">
-          <p className="label">Try asking</p>
+          <p className="label-card">Try asking</p>
           <ul className="flex flex-wrap gap-2">
             {SUGGESTED.map((s) => (
               <li key={s}>
@@ -222,7 +222,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
           {answer && (
             <div
               aria-live="polite"
-              className="rounded-md border border-[var(--line)] px-4 py-3 text-[15px] leading-[1.7] text-white whitespace-pre-wrap"
+              className="rounded-lg border border-[var(--line)] px-4 py-3 text-[15px] leading-[1.7] whitespace-pre-wrap"
             >
               {answer}
               {status === 'streaming' && (
@@ -235,7 +235,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
 
           {citations.length > 0 && (
             <div className="space-y-2">
-              <p className="label" id="sources-heading">
+              <p className="label-card" id="sources-heading">
                 Sources ({citations.length})
               </p>
               <ul className="space-y-1.5" aria-labelledby="sources-heading">
@@ -249,7 +249,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
                         onClick={() => toggleExpand(c.chunkId)}
                         aria-expanded={isOpen}
                         aria-controls={panelId}
-                        className="group flex w-full items-start gap-2 rounded border border-[var(--line)] bg-transparent px-3 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent-1)]"
+                        className="group flex w-full items-start gap-2 rounded-lg border border-[var(--line)] bg-transparent px-3 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent-1)]"
                       >
                         <span
                           aria-hidden="true"
@@ -258,7 +258,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
                           {i + 1}
                         </span>
                         <span className="flex-1 min-w-0">
-                          <span className="block truncate font-medium text-white">
+                          <span className="block truncate font-medium">
                             {c.section ?? '(unsectioned)'}
                           </span>
                           {isOpen && (
@@ -269,7 +269,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
                         </span>
                         <span
                           aria-hidden="true"
-                          className="mt-0.5 text-base font-bold leading-none text-[var(--muted)] group-hover:text-white"
+                          className="mt-0.5 text-base font-bold leading-none text-[var(--muted)] group-hover:text-[var(--card-ink)]"
                         >
                           {isOpen ? '−' : '+'}
                         </span>
@@ -285,7 +285,7 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
             <div
               role="alert"
               aria-live="assertive"
-              className="rounded-md border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+              className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300"
             >
               <strong className="font-semibold">Error: </strong>
               {error}
@@ -303,7 +303,9 @@ export function AskWidget({ endpoint = '/api/ask', showFooterCredits = true }: A
       )}
 
       {showFooterCredits && (
-        <p className="mt-10 text-sm text-[var(--muted)]">
+        // mt-auto anchors the credit to the bottom of a flex-column card (the
+        // standalone page); pt-10 keeps a min gap when content fills the height.
+        <p className="mt-auto pt-10 text-sm text-[var(--muted)]">
           Powered by Claude Sonnet 4.6 · Voyage-3 + rerank-2.5 · Turso libsql · Next.js 16
         </p>
       )}

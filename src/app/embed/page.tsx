@@ -56,7 +56,9 @@ export default function Embed() {
   }, []);
 
   return (
-    <main ref={mainRef} className="px-4 py-4">
+    <main ref={mainRef} className="ask-surface px-5 py-6">
+      {/* Bare widget only — the heading + intro live in the zeroindex.ai #ask
+          section (the marketing HTML), since the iframe renders inside that site. */}
       <AskWidget showFooterCredits={false} />
     </main>
   );
