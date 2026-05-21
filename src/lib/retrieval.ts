@@ -1,5 +1,6 @@
 import { db } from './db';
 import { embedQuery, rerank } from './embeddings';
+import { publicSourceUrl } from './sourcePath';
 import type { RetrievedChunk } from './types';
 
 const VECTOR_TOP_K = 12;
@@ -20,7 +21,7 @@ export async function vectorSearch(query: string, limit = VECTOR_TOP_K): Promise
   });
   return rs.rows.map((r) => ({
     id: Number(r.id),
-    sourcePath: String(r.source_path),
+    sourcePath: publicSourceUrl(String(r.source_path)),
     section: r.section ? String(r.section) : null,
     content: String(r.content),
     score: 1 - Number(r.dist),
@@ -57,7 +58,7 @@ export async function ftsSearch(query: string, limit = FTS_TOP_K): Promise<Retri
   });
   return rs.rows.map((r) => ({
     id: Number(r.id),
-    sourcePath: String(r.source_path),
+    sourcePath: publicSourceUrl(String(r.source_path)),
     section: r.section ? String(r.section) : null,
     content: String(r.content),
     score: -Number(r.score),

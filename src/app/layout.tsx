@@ -11,6 +11,13 @@ export const metadata: Metadata = {
     description: 'Ask anything about ZeroIndex — grounded answers with sources from the site.',
     url: '/',
     siteName: 'ZeroIndex',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Ask ZeroIndex' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ask · ZeroIndex',
+    description: 'Ask anything about ZeroIndex — grounded answers with sources from the site.',
+    images: ['/og-image.png'],
   },
 };
 

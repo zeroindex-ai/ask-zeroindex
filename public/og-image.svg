@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- subtle warm wash in bottom-right corner -->
+    <radialGradient id="cornerWash" cx="88%" cy="92%" r="75%">
+      <stop offset="0%" stop-color="#c026d3" stop-opacity="0.10" />
+      <stop offset="45%" stop-color="#7c3aed" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- hero gradient: fuchsia → violet → indigo (matches site .grad-text) -->
+    <linearGradient id="gradText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c026d3" />
+      <stop offset="50%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+
+    <!-- soft hairline echoing the site's .grad-divider -->
+    <linearGradient id="hairline" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9c958a" stop-opacity="0" />
+      <stop offset="25%" stop-color="#9c958a" stop-opacity="0.55" />
+      <stop offset="75%" stop-color="#9c958a" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#9c958a" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- warm cream bg -->
+  <rect width="1200" height="630" fill="#faf9f5"/>
+
+  <!-- subtle bottom-right gradient wash -->
+  <rect width="1200" height="630" fill="url(#cornerWash)"/>
+
+  <!-- Logo top-left — unified [0] mark + wordmark -->
+  <g transform="translate(80, 100)">
+    <path d="M185 -110V830H465V715H310V5H465V-110Z" fill="#52525b" transform="translate(0 0) scale(0.036 -0.036)"/>
+    <path d="M300 -10Q229 -10 177.0 17.0Q125 44 96.5 93.0Q68 142 68 208V522Q68 588 96.5 637.0Q125 686 177.0 713.0Q229 740 300 740Q371 740 423.0 713.0Q475 686 503.5 637.0Q532 588 532 522V208Q532 142 503.5 93.0Q475 44 423.0 17.0Q371 -10 300 -10ZM186 522V288L410 554Q401 590 372.0 611.0Q343 632 300 632Q247 632 216.5 602.0Q186 572 186 522ZM300 98Q352 98 383.0 128.0Q414 158 414 208V442L190 176Q199 140 228.0 119.0Q257 98 300 98Z" fill="#7c3aed" transform="translate(19.584 0) scale(0.036 -0.036)"/>
+    <path d="M135 -110V5H290V715H135V830H415V-110Z" fill="#52525b" transform="translate(39.168 0) scale(0.036 -0.036)"/>
+    <text x="70" y="-2" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" fill="#18181b" letter-spacing="-0.5">ZeroIndex</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="80" y="370" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="84" font-weight="800" fill="#18181b" letter-spacing="-2">
+    Ask anything.
+  </text>
+  <text x="80" y="475" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="84" font-weight="800" letter-spacing="-2">
+    <tspan fill="url(#gradText)">Grounded &amp; cited.</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="80" y="540" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="22" font-weight="500" fill="#52525b">
+    Ask ZeroIndex &#183; answers sourced from the site
+  </text>
+
+  <!-- soft bottom hairline -->
+  <rect x="0" y="598" width="1200" height="1" fill="url(#hairline)" />
+</svg>
