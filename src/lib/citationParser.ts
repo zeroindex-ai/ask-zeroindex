@@ -24,7 +24,6 @@ export function buildCitation(chunk: RetrievedChunk): Citation {
       : chunk.content.slice(0, QUOTE_MAX_CHARS).trimEnd() + '…';
   return {
     chunkId: chunk.id,
-    sourcePath: chunk.sourcePath,
     section: chunk.section,
     quote,
   };

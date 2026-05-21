@@ -32,7 +32,7 @@ describe('encodeSSE', () => {
   it('encodes a citation event with object data', () => {
     const bytes = encodeSSE({
       type: 'citation',
-      data: { chunkId: 7, sourcePath: '/x', section: 'A', quote: 'q' },
+      data: { chunkId: 7, section: 'A', quote: 'q' },
     });
     const str = new TextDecoder().decode(bytes);
     expect(str.startsWith('event: citation\ndata: ')).toBe(true);
@@ -40,7 +40,6 @@ describe('encodeSSE', () => {
     // The encoded frame always contains a 'data: ' segment, so [1] is present.
     expect(JSON.parse(str.split('data: ')[1]!.trim())).toEqual({
       chunkId: 7,
-      sourcePath: '/x',
       section: 'A',
       quote: 'q',
     });
@@ -59,7 +58,7 @@ describe('parseSSE', () => {
       { type: 'text', data: 'hello world' },
       {
         type: 'citation',
-        data: { chunkId: 5, sourcePath: '/p', section: null, quote: 'q' },
+        data: { chunkId: 5, section: null, quote: 'q' },
       },
       { type: 'done', data: { citations: [] } },
       { type: 'error', data: { message: 'boom' } },

@@ -91,13 +91,17 @@ describe('buildCitation', () => {
     expect([...c.quote].length).toBeLessThanOrEqual(161);
   });
 
-  it('preserves chunkId, sourcePath, and section', () => {
+  it('preserves chunkId and section', () => {
     const c = buildCitation({ ...baseChunk, content: 'x' });
     expect(c).toMatchObject({
       chunkId: 1,
-      sourcePath: '/path/file.html',
       section: 'Section A',
     });
+  });
+
+  it('does not leak sourcePath to the client citation', () => {
+    const c = buildCitation({ ...baseChunk, content: 'x' });
+    expect(c).not.toHaveProperty('sourcePath');
   });
 
   it('handles null section', () => {

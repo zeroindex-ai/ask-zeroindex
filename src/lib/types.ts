@@ -10,9 +10,11 @@ export type RetrievedChunk = Chunk & {
   source: 'vector' | 'fts' | 'rerank';
 };
 
+// NOTE: deliberately excludes sourcePath. The internal RetrievedChunk keeps it
+// for server-side prompt grounding, but the source path is the local ingest
+// path (e.g. /Users/.../index.html) and must never reach the client payload.
 export type Citation = {
   chunkId: number;
-  sourcePath: string;
   section: string | null;
   quote: string;
 };
