@@ -13,7 +13,7 @@ export default function Home() {
       </section>
       <section className="pb-24">
         <div className="ask-surface flex flex-col rounded-2xl p-8 md:p-10 max-w-4xl w-full min-h-[480px]">
-          <AskWidget />
+          <AskWidget showFooterCredits={false} />
         </div>
       </section>
     </>
