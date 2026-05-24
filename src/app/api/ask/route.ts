@@ -33,8 +33,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? '')
 // The stronger option a deployer can opt into is fail-closed: reject requests
 // with no configured origins instead of allowing all. Module-level guard so the
 // warning fires at most once, not per request.
-const IS_PRODUCTION =
-  process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production';
+const IS_PRODUCTION = process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production';
 if (ALLOWED_ORIGINS.length === 0 && IS_PRODUCTION) {
   console.error(
     '[ask/route] ALLOWED_ORIGINS is unset in production — CORS is wide open ' +
@@ -161,6 +160,15 @@ export async function POST(req: NextRequest) {
       let firstTokenAt: number | null = null;
       let outcome: AskTrace['outcome'] = 'ok';
       let errorMessage: string | undefined;
+      // Best-effort token usage, accumulated from the stream's message_start
+      // (input + cache tokens) and message_delta (cumulative output tokens).
+      // Stays null if the stream aborts before these arrive.
+      const usage = {
+        inputTokens: null as number | null,
+        outputTokens: null as number | null,
+        cacheCreationInputTokens: null as number | null,
+        cacheReadInputTokens: null as number | null,
+      };
       const safeEnqueue = (chunk: Uint8Array) => {
         if (closed) return;
         try {
@@ -179,6 +187,15 @@ export async function POST(req: NextRequest) {
 
         for await (const event of stream) {
           if (req.signal.aborted) break;
+          if (event.type === 'message_start') {
+            const u = event.message.usage;
+            usage.inputTokens = u.input_tokens;
+            usage.cacheCreationInputTokens = u.cache_creation_input_tokens ?? null;
+            usage.cacheReadInputTokens = u.cache_read_input_tokens ?? null;
+          } else if (event.type === 'message_delta') {
+            // message_delta carries the running output-token total.
+            usage.outputTokens = event.usage.output_tokens;
+          }
           if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
             if (firstTokenAt === null) firstTokenAt = Date.now();
             const { text, cited } = parseDelta(event.delta.text, state);
@@ -225,6 +242,10 @@ export async function POST(req: NextRequest) {
             retrievalMs: tRetrieval - t0,
             firstTokenMs: firstTokenAt === null ? null : firstTokenAt - t0,
             totalMs: Date.now() - t0,
+            inputTokens: usage.inputTokens,
+            outputTokens: usage.outputTokens,
+            cacheCreationInputTokens: usage.cacheCreationInputTokens,
+            cacheReadInputTokens: usage.cacheReadInputTokens,
             ...(errorMessage ? { errorMessage } : {}),
           },
           { model: ANSWER_MODEL }

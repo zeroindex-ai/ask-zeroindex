@@ -7,6 +7,13 @@ export type AskTrace = {
   firstTokenMs: number | null;
   totalMs: number;
   errorMessage?: string;
+  // Anthropic token usage, when a model call happened. Powers trace-pack's cost
+  // view. Null/absent on the retrieval-failure path (no model call) or when the
+  // stream aborts before usage is reported.
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  cacheCreationInputTokens?: number | null;
+  cacheReadInputTokens?: number | null;
 };
 
 type LoggedPayload = AskTrace & {

@@ -26,20 +26,32 @@ const CHUNKS: RetrievedChunk[] = [
   },
 ];
 
-// Minimal shape of the Anthropic content_block_delta events the route reads.
+// Minimal shapes of the Anthropic stream events the route reads.
 function textDelta(text: string) {
   return { type: 'content_block_delta' as const, delta: { type: 'text_delta' as const, text } };
+}
+function messageStart(usage: {
+  input_tokens: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+}) {
+  return { type: 'message_start' as const, message: { usage } };
+}
+function messageDelta(output_tokens: number) {
+  return { type: 'message_delta' as const, usage: { output_tokens } };
 }
 
 // The model emits citation markers inline; deltas can split a marker across
 // boundaries. This script exercises both: a clean marker (`[chunk:3]`) and one
 // that arrives split across two deltas (`[chu` + `nk:21]`).
-function fakeAnthropicStream(): AsyncGenerator<ReturnType<typeof textDelta>> {
+function fakeAnthropicStream() {
   const deltas = [
+    messageStart({ input_tokens: 1200, cache_read_input_tokens: 8000, cache_creation_input_tokens: 0 }),
     textDelta('The integration audit is a fixed-fee assessment'),
     textDelta('[chunk:3]'),
     textDelta('. Pricing is fixed-fee per engagement[chu'),
     textDelta('nk:21]. That is the whole story.'),
+    messageDelta(345),
   ];
   return (async function* () {
     for (const d of deltas) yield d;
@@ -62,6 +74,7 @@ vi.mock('@/lib/logAsk', () => ({ logAsk: vi.fn() }));
 
 import { POST } from './route';
 import { parseSSE } from '@/lib/sse';
+import { logAsk } from '@/lib/logAsk';
 import type { NextRequest } from 'next/server';
 
 function fakeRequest(body: unknown): NextRequest {
@@ -82,6 +95,7 @@ describe('POST /api/ask SSE stream (integration)', () => {
   beforeEach(() => {
     hybridSearch.mockClear();
     answer.mockClear();
+    vi.mocked(logAsk).mockClear();
   });
 
   it('emits chunks → text → citation → done in order and strips citation markers', async () => {
@@ -128,13 +142,25 @@ describe('POST /api/ask SSE stream (integration)', () => {
     expect(citations.map((c) => c.data.chunkId)).toEqual([3, 21]);
 
     // done carries the full citation list.
-    const done = events.find(
-      (e): e is Extract<AskEvent, { type: 'done' }> => e.type === 'done'
-    );
+    const done = events.find((e): e is Extract<AskEvent, { type: 'done' }> => e.type === 'done');
     expect(done?.data.citations.map((c) => c.chunkId)).toEqual([3, 21]);
 
     // Boundaries were actually driven.
     expect(hybridSearch).toHaveBeenCalledOnce();
     expect(answer).toHaveBeenCalledOnce();
+  });
+
+  it('reports Anthropic token usage to logAsk', async () => {
+    await drain(await POST(fakeRequest({ question: 'What is the integration audit?' })));
+    expect(vi.mocked(logAsk)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: 'ok',
+        inputTokens: 1200,
+        outputTokens: 345,
+        cacheCreationInputTokens: 0,
+        cacheReadInputTokens: 8000,
+      }),
+      { model: 'claude-sonnet-4-6' }
+    );
   });
 });
