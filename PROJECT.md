@@ -654,5 +654,5 @@ Verify with `gh secret list`. The workflow points at the **production** Turso DB
 
 ## 13. Cross-references
 
-- **Website repo (RAG content source):** [`zeroindex-ai/zeroindexai`](https://github.com/zeroindex-ai/zeroindexai)
+- **Website (RAG content source):** [zeroindex.ai](https://zeroindex.ai) — Astro site, source in the private `zeroindex-site` repo
 - **This repo:** [`zeroindex-ai/ask-zeroindex`](https://github.com/zeroindex-ai/ask-zeroindex)
