@@ -103,8 +103,8 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 │  ┌──────────────────┐  ┌────────────────┐  ┌──────────────────┐     │
 │  │ src/app/api/ask  │→ │ hybridSearch   │→ │ answer (Claude   │     │
 │  │ route.ts (SSE)   │  │  ├ vectorTopK  │  │  Sonnet 4.6      │     │
-│  │                  │  │  ├ ftsBM25     │  │  + caching       │     │
-│  │                  │  │  └ rerank-2.5  │  │  + streaming)    │     │
+│  │                  │  │  ├ ftsBM25     │  │  + streaming)    │     │
+│  │                  │  │  └ rerank-2.5  │  │                  │     │
 │  └──────────────────┘  └────────────────┘  └──────────────────┘     │
 └──────────│──────────────────│─────────────────────│────────────────┘
            │                  │                     │
