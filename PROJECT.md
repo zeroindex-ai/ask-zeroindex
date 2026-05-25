@@ -55,7 +55,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 | **Storage**         | Turso (libsql) — vector + FTS in one DB                 | SQLite-compatible (familiar), native `F32_BLOB(N)` + `vector_top_k()` (no sqlite-vec extension needed), native FTS5 for BM25. Free tier easily covers this scale.             |
 | **Embeddings**      | Voyage-3 (1024 dim)                                     | Better retrieval quality than OpenAI text-embedding-3-small in published benchmarks. Free tier: 200M tokens.                                                                  |
 | **Reranking**       | Voyage rerank-2.5                                       | Same vendor relationship; designed to pair with Voyage-3 embeddings; meaningful precision lift over raw vector or BM25 alone.                                                 |
-| **LLM**             | Claude Sonnet 4.6                                       | Primary model commitment for ZeroIndex consultancy; strong RAG quality at moderate cost ($3/M in, $15/M out); prompt caching well-supported.                                  |
+| **LLM**             | Claude Sonnet 4.6                                       | Primary model commitment for ZeroIndex consultancy; strong RAG quality at moderate cost ($3/M in, $15/M out).                                  |
 | **HTML parser**     | cheerio                                                 | Mature, jQuery-like API, fast enough for static HTML ingest.                                                                                                                  |
 | **Validation**      | Zod 4                                                   | TypeScript-first schema validation, used at the API boundary in `route.ts`.                                                                                                   |
 | **Package manager** | pnpm 10                                                 | Faster + disk-efficient. Same package manager as the `mcp-pack` monorepo — consistency across the `@zeroindex-ai/*` ecosystem.                                                |
@@ -80,7 +80,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 | **Chunking**         | By section heading (h2), then by h3 if present; 1600-char target, 200-char overlap when oversized | Mirrors human authoring intent. Headings carry semantic boundary signal. Char-based budgeting is good enough for v1; switch to token-counted budgeting if eval shows boundary issues.  |
 | **Citations**        | `[chunk:N]` markers in the streamed text                                                          | Simple format the model already produces; client-side parser substitutes them for rendered citation chips. No structured tool calls needed for this scale.                             |
 | **Streaming format** | SSE (Server-Sent Events)                                                                          | Native browser support, works through CDNs cleanly, simpler than WebSockets for one-way streams. Events: `chunks` (id list, sent first) → `text` (deltas) → `done`.                    |
-| **Prompt caching**   | Cache `system` + retrieved `context` (`cache_control: { type: 'ephemeral' }`)                     | Visitor questions vary; the system prompt and recent retrieved chunks are reusable across nearby requests. Real cost driver.                                                           |
+| **Prompt caching**   | None — `cache_control` was tried and removed                                                      | At this corpus scale the two-block (system + context) shape produced an asymmetric pattern (`cache_creation` written every call, `cache_read` never set), a net 1.25x cost _penalty_. `cache_control` is intentionally not set. Preconditions to revisit are in eval-baselines.md §6. |
 | **Re-ingest model**  | Drop and rebuild (not incremental)                                                                | At ~22 chunks per ingest of `zeroindex.ai`, full reingest takes seconds. Not worth incremental complexity until content scale justifies.                                               |
 
 ---
@@ -164,8 +164,8 @@ rerank(query, candidate texts, topK=5) via Voyage rerank-2.5
 answer(question, top-5 chunks)
    │
    ├─ Anthropic messages.stream
-   │  ├─ system: SYSTEM_PROMPT (cached)
-   │  ├─ system: "Context: [chunk:N] ..." block (cached)
+   │  ├─ system: SYSTEM_PROMPT (no cache_control — see eval-baselines.md §6)
+   │  ├─ system: "Context: [chunk:N] ..." block (no cache_control)
    │  └─ user: question
    │
    ▼
@@ -218,7 +218,7 @@ ask-zeroindex/
 │       ├── db.ts                   Turso client factory + initSchema() + EMBEDDING_DIM
 │       ├── embeddings.ts           Voyage REST: embedDocuments / embedQuery / rerank
 │       ├── retrieval.ts            vectorSearch + ftsSearch + hybridSearch (with rerank)
-│       ├── claude.ts               Anthropic client; SYSTEM_PROMPT; answer() (caching+stream)
+│       ├── claude.ts               Anthropic client; SYSTEM_PROMPT; answer() (streaming, no prompt cache)
 │       └── types.ts                Chunk, RetrievedChunk, Citation, AnswerResponse
 ├── scripts/
 │   ├── ingest.ts                   HTML → chunks → embeddings → Turso → FTS rebuild
