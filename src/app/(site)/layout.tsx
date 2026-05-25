@@ -55,9 +55,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t line py-10 text-sm">
             <div className="muted flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
               <div className="mono">&copy; 2026 ZeroIndex LLC &middot; Pennsylvania</div>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                 <a className="subtle" href="https://github.com/zeroindex-ai/ask-zeroindex">
                   Source
+                </a>
+                <a className="subtle" href="mailto:hello@zeroindex.ai">
+                  hello@zeroindex.ai
                 </a>
                 <a className="subtle" href="https://zeroindex.ai">
                   zeroindex.ai
