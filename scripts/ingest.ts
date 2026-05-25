@@ -1,7 +1,10 @@
 // Ingest pipeline: parse zeroindex.ai HTML, chunk by section, embed via Voyage-3, upsert to Turso.
 // Run: pnpm ingest
 //
-// Default source: ../zeroindexai/index.html (sibling clone of website repo).
+// The website is an Astro static site (repo: zeroindex-site, deployed to Vercel).
+// `astro build` emits a single static dist/index.html with the same <section id>
+// structure cheerio walks below, so the single-file ingest mechanism is unchanged.
+// Default source: ../zeroindex-site/dist/index.html (sibling clone, post-build).
 // Override: INGEST_SOURCE=/path/to/file.html pnpm ingest
 
 import { readFile } from 'node:fs/promises';
@@ -89,7 +92,8 @@ function splitOversized(chunks: RawChunk[]): RawChunk[] {
 
 async function main() {
   const t0 = Date.now();
-  const source = process.env.INGEST_SOURCE ?? resolve(process.cwd(), '../zeroindexai/index.html');
+  const source =
+    process.env.INGEST_SOURCE ?? resolve(process.cwd(), '../zeroindex-site/dist/index.html');
   console.log(`source: ${source}`);
 
   const html = await readFile(source, 'utf-8');

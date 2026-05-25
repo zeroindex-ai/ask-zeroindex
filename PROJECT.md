@@ -17,7 +17,7 @@ This document captures the research, strategic decisions, architecture, implemen
 
 A RAG (Retrieval-Augmented Generation) chat widget for `zeroindex.ai`. Visitors type questions about ZeroIndex — services, principles, pricing, process, founder background — and a Claude Sonnet 4.6 model answers strictly from the site's own content, with chunk-level citations.
 
-The widget is mounted on `zeroindex.ai` (Cloudflare Workers) via an embed snippet. The backing API is a Next.js route deployed to Vercel. Storage is Turso (libsql cloud) — a single SQLite-compatible DB holding both vector embeddings and a BM25 full-text index.
+The widget is mounted on `zeroindex.ai` (Astro static site on Vercel; DNS at Cloudflare) via an embed snippet. The backing API is a Next.js route deployed to Vercel. Storage is Turso (libsql cloud) — a single SQLite-compatible DB holding both vector embeddings and a BM25 full-text index.
 
 ### Why this project
 
@@ -89,7 +89,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│                         zeroindex.ai (Cloudflare Worker)            │
+│                         zeroindex.ai (Astro on Vercel)              │
 │                  ┌────────────────────────────────────┐             │
 │                  │  embed snippet → widget (iframe   │             │
 │                  │  served from ask.zeroindex.ai)    │             │
@@ -123,7 +123,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
 ### Data flow — ingest
 
 ```
-data/ or ../zeroindexai/index.html
+data/ or ../zeroindex-site/dist/index.html
    │
    ▼
 [scripts/ingest.ts]
@@ -298,7 +298,7 @@ Anthropic  OK (ok)
 
 **Ingest baseline (2026-05-05):**
 
-- Source: sibling `zeroindexai` repo's `index.html`
+- Source: sibling `zeroindex-site` repo's built `dist/index.html` (Astro static output; was `zeroindexai/index.html` pre-Astro-migration)
 - Chunks extracted: 22
 - Avg chunk size: 279 chars
 - Total ingest time: 83.2s (dominated by 22 sequential INSERTs to Turso us-east-1; batch-insert optimization deferred)
@@ -510,12 +510,12 @@ Region: `iad1` (us-east-1) to match Turso region — keeps DB roundtrip latency 
 
 ### Widget integration on zeroindex.ai
 
-The website lives at `zeroindex-ai/zeroindexai` and deploys to Cloudflare Workers. Two integration options:
+The website lives in the `zeroindex-site` repo (Astro static site) and deploys to Vercel. Two integration options:
 
 | Option                                                                                                               | Pros                                                                                         | Cons                                                                                                    |
 | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Embed snippet** — `<script>` tag pointing at a Vercel-hosted JS bundle that injects an iframe or shadow DOM widget | Decouples deploy cycles; widget bundle independently versioned; doesn't touch website Worker | Cross-origin; CSS isolation work; iframe has sizing quirks                                              |
-| **Inline component** — write the widget directly into the website HTML, fetch from `ask.zeroindex.ai/api/ask`        | Tighter visual integration; full CSS control; same-origin if subdomain is set up             | Couples widget releases to website releases; fetch from Cloudflare Worker → Vercel needs CORS allowlist |
+| **Embed snippet** — `<script>` tag pointing at a Vercel-hosted JS bundle that injects an iframe or shadow DOM widget | Decouples deploy cycles; widget bundle independently versioned; doesn't touch website deploy | Cross-origin; CSS isolation work; iframe has sizing quirks                                              |
+| **Inline component** — write the widget directly into the website HTML, fetch from `ask.zeroindex.ai/api/ask`        | Tighter visual integration; full CSS control; same-origin if subdomain is set up             | Couples widget releases to website releases; cross-origin fetch from the website → ask.zeroindex.ai needs CORS allowlist |
 
 **Shipped:** iframe served from `ask.zeroindex.ai` (CNAME to the Vercel deploy) embedded on `zeroindex.ai` between FAQ and Contact, with postMessage-driven auto-resize. CORS allowlist scoped to the marketing domain.
 
@@ -567,7 +567,7 @@ pnpm eval                                 # 30-query LLM-as-judge
 | `VOYAGE_API_KEY`           | dash.voyageai.com → API Keys                             | Embeddings + reranker                |
 | `TURSO_DATABASE_URL`       | `turso db show ask-zeroindex --url`                      | libsql HTTP endpoint                 |
 | `TURSO_AUTH_TOKEN`         | `turso db tokens create ask-zeroindex --expiration none` | DB auth                              |
-| `INGEST_SOURCE` (optional) | path to alternate HTML file                              | Default: `../zeroindexai/index.html` |
+| `INGEST_SOURCE` (optional) | path to alternate HTML file                              | Default: `../zeroindex-site/dist/index.html` |
 
 ### CI / GitHub Actions secrets
 
