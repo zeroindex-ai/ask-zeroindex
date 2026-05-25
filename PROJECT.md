@@ -99,7 +99,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
                                    │ ← SSE: chunks → text* → done
                                    ▼
 ┌────────────────────────────────────────────────────────────────────┐
-│              Next.js 16 on Vercel (us-east-1, free tier)            │
+│            Next.js 16 on Vercel (region iad1, free tier)           │
 │  ┌──────────────────┐  ┌────────────────┐  ┌──────────────────┐     │
 │  │ src/app/api/ask  │→ │ hybridSearch   │→ │ answer (Claude   │     │
 │  │ route.ts (SSE)   │  │  ├ vectorTopK  │  │  Sonnet 4.6      │     │
@@ -112,7 +112,7 @@ Load-bearing decisions, documented because the _why_ often outlasts the _what_.
            │ FTS5 MATCH       │ (REST)              │ Messages API
            ▼                  ▼                     ▼
 ┌──────────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│  Turso (aws-us-east) │  │  Voyage AI       │  │  Anthropic API   │
+│  Turso aws-us-east-1 │  │  Voyage AI       │  │  Anthropic API   │
 │  ask-zeroindex.db    │  │  (embed+rerank)  │  │  (claude-sonnet) │
 │  ├ chunks (F32_BLOB) │  │                  │  │                  │
 │  ├ chunks_fts (FTS5) │  │                  │  │                  │
@@ -210,31 +210,54 @@ CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts
 ask-zeroindex/
 ├── src/
 │   ├── app/
+│   │   ├── (site)/                 chromed route group (header/footer)
+│   │   │   ├── layout.tsx          canonical ZeroIndex subdomain chrome
+│   │   │   └── page.tsx            standalone widget page (ask.zeroindex.ai)
+│   │   ├── embed/page.tsx          chromeless iframe route, postMessage auto-resize
 │   │   ├── api/ask/route.ts        POST endpoint, Zod validation, SSE streaming
-│   │   ├── layout.tsx              root layout (default from create-next-app)
-│   │   ├── page.tsx                widget UI (input, streaming output, citation chips)
-│   │   └── globals.css             Tailwind 4 base
+│   │   ├── layout.tsx              root layout (metadata, globals.css import)
+│   │   ├── globals.css             Tailwind 4 base + design tokens
+│   │   └── favicon.ico             app-router favicon (Next 16 serves from app/)
+│   ├── components/
+│   │   ├── AskWidget.tsx           client widget (input, streaming output, citation chips)
+│   │   └── AskIntro.tsx            shared Ask section copy (standalone + embed surfaces)
 │   └── lib/
-│       ├── db.ts                   Turso client factory + initSchema() + EMBEDDING_DIM
+│       ├── db.ts                   lazy Turso client singleton + initSchema() + EMBEDDING_DIM
 │       ├── embeddings.ts           Voyage REST: embedDocuments / embedQuery / rerank
 │       ├── retrieval.ts            vectorSearch + ftsSearch + hybridSearch (with rerank)
 │       ├── claude.ts               Anthropic client; SYSTEM_PROMPT; answer() (streaming, no prompt cache)
+│       ├── citationParser.ts       streaming [chunk:N] marker extraction / stripping
+│       ├── sse.ts                  SSE event framing helpers
+│       ├── rateLimit.ts            Turso-backed atomic token-bucket per-IP limiter
+│       ├── logAsk.ts               structured JSON log + optional trace-pack dual-write
+│       ├── env.ts                  validated env-var access
+│       ├── errors.ts               typed error helpers
+│       ├── models.ts               model id constants
+│       ├── sourcePath.ts           source-path normalization for citations
 │       └── types.ts                Chunk, RetrievedChunk, Citation, AnswerResponse
-├── scripts/
+├── scripts/                        operational + research tsx scripts
 │   ├── ingest.ts                   HTML → chunks → embeddings → Turso → FTS rebuild
 │   ├── smoke.ts                    3-service connection test (Anthropic, Voyage, Turso)
 │   ├── verify.ts                   post-ingest sanity (counts + sample + retrieval)
-│   └── ask.ts                      end-to-end question → grounded answer w/ timing
+│   ├── ask.ts                      end-to-end question → grounded answer w/ timing
+│   ├── list-chunks.ts              dump stored chunks for inspection
+│   ├── ablate.ts                   retrieval ablation (recall@K + latency by mode)
+│   ├── cache-stats.ts              per-query prompt-cache token instrumentation
+│   ├── cache-repro.ts              minimal repro of the cache-asymmetry investigation
+│   ├── migrate-rate-limit.ts       one-off rate-limit table migration
+│   └── _run.ts                     shared script bootstrap (env load + db teardown)
 ├── evals/
 │   ├── golden-seed.json            Q/A pairs with must_mention assertions (30 hand-labeled items)
 │   └── run.ts                      LLM-as-judge harness
-├── data/                           source content drop-zone (currently empty; ingest reads from sibling website repo)
-├── public/                         static assets (default Next scaffold)
+├── preview/embed-preview.html      local iframe-embed preview template
+├── data/                           source content drop-zone (.gitkeep; ingest reads from sibling website repo)
+├── public/                         static assets (favicons, og-image)
 ├── .env.example                    template
 ├── .env.local                      real keys (gitignored)
 ├── package.json                    pnpm scripts: dev, build, typecheck, lint, ingest, eval
 ├── README.md                       short user-facing intro
 ├── PROJECT.md                      this document
+├── eval-baselines.md               retrieval ablation + prompt-caching decision record
 ├── AGENTS.md                       Next 16 heads-up note (auto-generated)
 └── CLAUDE.md                       points at AGENTS.md (auto-generated)
 ```
@@ -506,7 +529,7 @@ vercel env add TURSO_AUTH_TOKEN production
 vercel deploy --prod
 ```
 
-Region: `iad1` (us-east-1) to match Turso region — keeps DB roundtrip latency tight.
+Vercel function region: `iad1` (Vercel's US-East / Washington DC). This colocates with the Turso DB region `aws-us-east-1` (Turso uses AWS-style location codes) — same geography, so DB roundtrip latency stays tight. The two codes name the same region for different services; they are not interchangeable.
 
 ### Widget integration on zeroindex.ai
 

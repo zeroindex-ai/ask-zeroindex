@@ -30,20 +30,36 @@ ask (src/app/api/ask/route.ts)
 ```
 src/
   app/
-    api/ask/route.ts   POST endpoint, SSE streaming
-    page.tsx           widget demo page
+    (site)/            chromed routes (header/footer via (site)/layout.tsx)
+      layout.tsx       canonical ZeroIndex subdomain chrome
+      page.tsx         standalone widget page (ask.zeroindex.ai)
+    embed/page.tsx     chromeless iframe route (embedded on zeroindex.ai)
+    api/ask/route.ts   POST endpoint, Zod validation, SSE streaming
+    layout.tsx         root layout (metadata, globals.css)
+    globals.css        Tailwind 4 base + design tokens
+  components/
+    AskWidget.tsx      client widget (input, streaming output, citations)
+    AskIntro.tsx       shared section copy (standalone + embed)
   lib/
-    db.ts              Turso client + schema
+    db.ts              lazy Turso client singleton + initSchema()
     embeddings.ts      Voyage embed + rerank (REST)
     retrieval.ts       vector + FTS + hybrid + rerank
-    claude.ts          Anthropic client, system prompt, streaming
+    claude.ts          Anthropic client, system prompt, streaming answer
+    citationParser.ts  [chunk:N] marker extraction
+    sse.ts             SSE event encoding helpers
+    rateLimit.ts       Turso-backed atomic token bucket
+    logAsk.ts          structured logging + optional trace-pack dual-write
+    env.ts             validated env-var access
+    errors.ts          typed error helpers
+    models.ts          model id constants
+    sourcePath.ts      source-path normalization
     types.ts           Chunk, RetrievedChunk, Citation, AnswerResponse
 scripts/
-  ingest.ts            content → chunks → embeddings → DB
+  ingest.ts            content → chunks → embeddings → DB (+ smoke, verify, ask, ablate, …)
 evals/
   golden-seed.json     Q/A pairs with must_mention assertions (30 hand-labeled items)
   run.ts               LLM-as-judge harness
-data/                  source content (gitignored — pulled fresh per ingest)
+data/                  source content drop-zone (.gitkeep; ingest reads sibling site repo)
 ```
 
 ## Setup
