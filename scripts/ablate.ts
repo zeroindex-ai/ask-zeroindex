@@ -10,7 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { embedQueries, rerank } from '@/lib/embeddings';
 import { vectorSearch, ftsSearch, hybridCandidates } from '@/lib/retrieval';
-import { recallAtK, p50, p95 } from '@zeroindex-ai/eval-pack';
+import { recall, p50, p95 } from '@zeroindex-ai/eval-pack';
 import { runMain, sleep, RERANK_THROTTLE_MS, pad } from './_run';
 
 type GoldenItem = {
@@ -109,7 +109,7 @@ function record(
   grid[mode][item.id] = {
     ids,
     latency,
-    recall: recallAtK(ids.map(String), item.relevant_refs),
+    recall: recall(ids.map(String), item.relevant_refs),
   };
 }
 

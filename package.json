@@ -33,7 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.7",
-    "@zeroindex-ai/eval-pack": "^0.2.0",
+    "@zeroindex-ai/eval-pack": "^0.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "jsdom": "^29.1.1",
