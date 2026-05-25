@@ -13,16 +13,16 @@ export default defineConfig({
       reporter: ['text', 'html'],
       include: ['src/**/*.ts', 'src/**/*.tsx', 'evals/**/*.ts'],
       exclude: ['**/*.test.ts', '**/*.test.tsx', 'src/**/types.ts'],
-      // Honest, enforced gate. Measured 2026-05-20: statements 60.6%,
-      // branches 55.2%, functions 62.5%, lines 62.4%. Thresholds sit ~3%
+      // Honest, enforced gate. Measured 2026-05-25: statements 61.1%,
+      // branches 56.0%, functions 61.6%, lines 62.9%. Thresholds sit ~3%
       // below the lowest measured metric (branches) so CI run-to-run variance
       // doesn't flake the gate. Raise these as coverage of the remaining
       // I/O-bound modules (claude/db/embeddings) and route.ts improves.
       thresholds: {
-        lines: 52,
-        functions: 52,
-        branches: 52,
-        statements: 52,
+        lines: 53,
+        functions: 53,
+        branches: 53,
+        statements: 53,
       },
     },
   },

@@ -26,6 +26,8 @@ export type RateLimitOptions = {
 };
 
 // Pull the first non-empty IP from a possibly comma-separated x-forwarded-for.
+// The leftmost entry is trusted because Vercel sets x-forwarded-for at the edge
+// (overwriting any client-supplied value), so it is not caller-spoofable here.
 function firstForwardedIp(header: string | null): string | null {
   if (!header) return null;
   const first = header.split(',')[0]?.trim();
