@@ -5,7 +5,7 @@ RAG chat widget for zeroindex.ai. Answers visitor questions about ZeroIndex's se
 ## Stack
 
 - **Next.js 16** (App Router, src dir, TypeScript, Tailwind 4, Turbopack default)
-- **Claude Sonnet 4.6** for answer generation, with prompt caching on system + retrieved context
+- **Claude Sonnet 4.6** for answer generation (prompt caching was evaluated and removed — it was net-negative at this corpus scale; see eval-baselines.md §6)
 - **Voyage-3** for embeddings, **rerank-2.5** for reranking
 - **Turso** (libsql) — native vector (`F32_BLOB`) + FTS5 hybrid retrieval
 - **Zod** for request validation
