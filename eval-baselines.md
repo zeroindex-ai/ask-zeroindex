@@ -2,6 +2,8 @@
 
 > Snapshot: 2026-05-07 · captured after retrieval ablation + LLM-as-judge baseline
 > Source data: `evals/golden-seed.json` (30 hand-labeled queries: 19 positive, 6 negative, 3 adversarial, 2 multi-part)
+>
+> **Final caching decision (2026-05-08, §6):** prompt caching is NOT enabled — `cache_control` was tried and removed because it was net-negative at this corpus scale. Sections 2–4 below record the earlier hypothesis that a longer prompt would let caching engage "as a side effect"; the §6 investigation that followed **disproved that** and the marker was removed from `src/lib/claude.ts` entirely. Where §2–§4 read as if caching is or will be active, §6 is the authoritative correction.
 
 Numbers here are the baseline future runs are compared against — when retrieval changes, prompts change, or the chunking strategy changes, regenerate and diff.
 
@@ -77,7 +79,7 @@ All scripts respect `RERANK_THROTTLE_MS` (default 21000ms for Voyage's 3 RPM fre
 
 ## 2. Prompt cache hit rate
 
-**Question:** is the `cache_control` instrumentation in `src/lib/claude.ts` actually causing the system prompt + retrieved context to be cached, and if so, what's the cost saving?
+**Question:** is the `cache_control` instrumentation that was in `src/lib/claude.ts` at the time of this snapshot actually causing the system prompt + retrieved context to be cached, and if so, what's the cost saving? (The marker was later removed — see the §6 final decision.)
 
 ### Result: 0% cache hit rate
 
@@ -108,7 +110,7 @@ Anthropic's prompt cache has a minimum cacheable prefix size: **1024 tokens for 
 | Increase retrieved chunks to top-8                                   | Context block alone clears 1024 tokens → cache hits when same chunks are retrieved                                                                 | Already rejected for retrieval-noise reasons                                                   |
 | Increase chunk size (`TARGET_CHARS` 1600 → 2400)                     | Each chunk grows; 5 chunks × ~600 tokens ≈ 3000 tokens of context. Cleanly above threshold.                                                        | Coarser chunks may hurt retrieval precision; would need a re-ablation to validate              |
 
-**Recommendation:** combine (1) with the prompt iteration — write the style guide / few-shots that make answers sharper, and let the cache benefit fall out as a side effect.
+**Recommendation (snapshot-time, later disproved):** combine (1) with the prompt iteration — write the style guide / few-shots that make answers sharper, and let the cache benefit fall out as a side effect. **Update:** the §6 investigation (2026-05-08) found the cache benefit did NOT fall out — the two-block shape produced an asymmetric write-without-read pattern that was net-negative — so `cache_control` was removed. The prompt iteration shipped on its quality merits alone.
 
 ### Cost projection at production scale
 
@@ -137,7 +139,7 @@ Conclusion: caching is a "nice when it engages" optimization; not a critical pat
 | Embedding model             | `voyage-3` (1024 dim)           | (existing)                                                                   |
 | Reranker                    | `rerank-2.5`                    | (existing)                                                                   |
 | Answer model                | `claude-sonnet-4-6`             | (existing)                                                                   |
-| Cache control               | `ephemeral` on system + context | (existing — currently no-op until system prompt grows)                       |
+| Cache control               | None — `cache_control` removed  | At snapshot time an `ephemeral` marker sat on the system + context blocks but was a no-op; the §6 investigation (2026-05-08) showed it was net-negative and it was removed entirely |
 | Chunk target size           | 1600 chars / ~70 tokens         | (existing — revisit if eval baseline degrades after expanding to 30 queries) |
 
 ## 4. LLM-as-judge eval + prompt iteration
@@ -248,5 +250,5 @@ After the 2 label fixes, the same prompt would score **29/30 (97%)** without fur
 ### Top-line decisions
 
 - **System prompt iteration shipped** — 90% pass rate is the new baseline; future regressions show up in the `evals/run.ts` deltas
-- **Caching enabled as a side effect** — longer prompt was a quality win first, cache enablement second
+- **Caching NOT enabled** — the longer prompt was a quality win (kept on its own merits), but the hypothesized cache-as-a-side-effect benefit did not materialize; `cache_control` was removed because it was net-negative (see the decision above)
 - **Multi-part coverage gap** documented; treat as the leading-edge improvement for the next pass
