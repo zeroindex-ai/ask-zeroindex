@@ -270,7 +270,7 @@ ask-zeroindex/
 
 - Scaffold + Turso schema + ingest pipeline + Voyage embeddings + hybrid retrieval
 - HTTP layer end-to-end; structured citation parsing from `[chunk:N]` markers
-- Widget UI on `src/app/page.tsx` — input, streaming output, citation chips
+- Widget UI — input, streaming output, citation chips (later refactored to `src/components/AskWidget.tsx`, mounted by `src/app/(site)/page.tsx`)
 - Prompt caching investigation and retrieval ablation
 - Eval harness with 30 golden Q/A; LLM-as-judge; 90% pass-rate baseline locked in
 
@@ -297,7 +297,7 @@ Re-ingest as site copy changes; re-eval after material prompt or retrieval chang
 - pnpm 10 + Node 24 LTS via nvm
 - Lib structure: `db.ts`, `embeddings.ts`, `retrieval.ts`, `claude.ts`, `types.ts`
 - API route stub: `src/app/api/ask/route.ts` (POST, Zod-validated, SSE)
-- Stubs: `scripts/ingest.ts`, `evals/run.ts`, `evals/golden.json`, `data/.gitkeep`
+- Stubs: `scripts/ingest.ts`, `evals/run.ts`, `evals/golden.json` (later renamed `evals/golden-seed.json`), `data/.gitkeep`
 - `.env.example` + working `.env.local` (4 keys: Anthropic, Voyage, Turso URL + token)
 - README + this PROJECT.md
 - pnpm scripts: `dev`, `build`, `typecheck`, `lint`, `ingest`, `eval`
@@ -350,7 +350,7 @@ Anthropic  OK (ok)
   - Streaming citation parser: extracts `[chunk:N]` markers from rolling buffer, strips from text deltas, emits `citation` events as new chunks are referenced
   - Tail flush at end of stream (any unmarked trailing `[` becomes literal text)
   - Try/catch around the stream loop emits an `error` SSE event on Voyage/Anthropic/Turso mid-stream failures
-- Built `Citation` objects with `{chunkId, sourcePath, section, quote}` — quote is first 160 chars of chunk content with ellipsis
+- Built `Citation` objects with `{chunkId, section, quote}` — quote is first 160 chars of chunk content with ellipsis. (`sourcePath` was later deliberately dropped from the client payload because it leaked the local ingest path; the internal `RetrievedChunk` keeps it server-side only — see `types.ts`.)
 - Final `done` event carries the full citations array
 
 **SSE event protocol (final):**
@@ -358,7 +358,7 @@ Anthropic  OK (ok)
 ```
 event: chunks      data: [<chunkId>, ...]               // first, with all retrieved ids
 event: text        data: "<text delta>"                 // many; markers stripped
-event: citation    data: { chunkId, sourcePath, section, quote }   // one per unique cited chunk, inline
+event: citation    data: { chunkId, section, quote }   // one per unique cited chunk, inline (sourcePath deliberately excluded — see below)
 event: done        data: { citations: [...] }           // last
 event: error       data: { message }                    // only on failure
 ```
@@ -376,7 +376,7 @@ event: error       data: { message }                    // only on failure
 
 **Done:**
 
-- Single-file client component on `src/app/page.tsx` (`'use client'`)
+- Single-file client component (`'use client'`) — later moved to `src/components/AskWidget.tsx`, mounted by `src/app/(site)/page.tsx`
 - Browser-side SSE parsing via `fetch()` + `ReadableStream` reader (`EventSource` only supports GET; we POST)
 - State machine: `idle → retrieving → streaming → done | error`
 - Empty-state shows 4 suggested questions as clickable chips (one-click ask)
@@ -432,7 +432,7 @@ cost per 5 queries          $0.0297 (no cache savings)
   - Claude judge call (Sonnet 4.6) returning JSON `{appropriate, grounded, reason}`
   - Per-category aggregates + saved JSON to `evals/results/run-<timestamp>.json`
 - Iterated `SYSTEM_PROMPT` in `src/lib/claude.ts` from ~200 to ~600 tokens with style guidance, explicit refusal patterns ("don't pivot to listing what ZeroIndex DOES do"), four worked-example refusals, two worked-example injection refusals
-- Extracted `evals/metrics.ts` (recallAtK, percentile, p50, p95) with 11 unit tests
+- Extracted `evals/metrics.ts` (recallAtK, percentile, p50, p95) with 11 unit tests (these metrics later graduated into the published `@zeroindex-ai/eval-pack`, which this repo now consumes; no `evals/metrics.ts` is tracked here anymore)
 - `evals/results/` gitignored — runs are reproducible from `evals/run.ts`; baseline numbers are documented in `eval-baselines.md`
 
 **Headline numbers:**
@@ -662,7 +662,7 @@ Verify with `gh secret list`. The workflow points at the **production** Turso DB
 - **Latency over budget** — first-token 3.8s vs 2s target. Likely retrieval (2.5s = embed query + parallel vector/FTS + rerank). Address by measuring each stage; consider warm-keeping the rerank endpoint.
 - **Minor synthesis hallucination** — model occasionally infers offering names not literally in context (e.g., "Claude Evals"). To be addressed via tighter system prompt + eval iteration.
 - **22 chunks may be too coarse or too fine** — TBD until eval baseline. Adjust `TARGET_CHARS` if chunks are losing topical coherence or ftps are too thin.
-- **Sequential INSERTs to Turso** — 22 inserts × ~3s roundtrip = 66s of the 83s ingest time. Switch to `db.batch([...])` API when re-ingest cadence increases.
+- **Sequential INSERTs to Turso** — 22 inserts × ~3s roundtrip dominate the ingest wall-clock time. The inserts now run inside a single atomic write transaction (`ingest.ts:121-131`), so a mid-pipeline failure can no longer leave the table empty/partial; only the per-insert round-trip latency remains. Could batch via `db.batch([...])` to cut that latency if re-ingest cadence increases.
 
 ### Future work
 
