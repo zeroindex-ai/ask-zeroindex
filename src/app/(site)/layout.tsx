@@ -39,9 +39,17 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 </svg>
                 <span className="brand-name">ZeroIndex</span>
               </a>
-              <a href="https://zeroindex.ai" className="btn-primary">
-                <span aria-hidden="true">&larr;</span>
-                zeroindex.ai
+              {/* Unified model (2026-05-30): apps open from the apex in a new
+                  tab, so the header converts (→ intake, new tab) instead of a
+                  redundant "back" link; the brand logo (left) is the path home.
+                  See the zeroindex-app-layout skill. */}
+              <a
+                href="https://intake.zeroindex.ai"
+                target="_blank"
+                rel="noopener"
+                className="btn-primary"
+              >
+                Work with ZeroIndex
               </a>
             </div>
           </div>
