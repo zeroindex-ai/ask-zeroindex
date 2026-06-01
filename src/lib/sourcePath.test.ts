@@ -3,7 +3,7 @@ import { publicSourceUrl } from './sourcePath';
 
 describe('publicSourceUrl', () => {
   it('maps a local ingest path to the public origin', () => {
-    expect(publicSourceUrl('/Users/Abhishek/Desktop/ZeroIndex/Code/zeroindexai/index.html')).toBe(
+    expect(publicSourceUrl('/local/path/zeroindex-site/index.html')).toBe(
       'https://zeroindex.ai'
     );
   });

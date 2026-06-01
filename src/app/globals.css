@@ -70,7 +70,7 @@ body {
 }
 
 /* Dark widget surface — the Ask chat keeps its warm near-black card so the
-   dark-on-cream contrast stays deliberate (project_widget_design_intent).
+   dark-on-cream contrast stays deliberate.
    Scopes the line/muted tokens to dark values + sets bg/ink, so AskWidget and
    AskIntro render unchanged whether on the cream standalone page (as a card)
    or filling the dark embed iframe. */

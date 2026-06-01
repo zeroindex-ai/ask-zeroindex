@@ -1,5 +1,5 @@
 // The ingest stores the local file path it read from (see scripts/ingest.ts —
-// e.g. /Users/.../zeroindexai/index.html). That local path must never surface,
+// e.g. /…/zeroindex-site/index.html). That local path must never surface,
 // neither in the LLM prompt context (claude.ts) nor in any future client
 // payload. Map it to the public origin at read time. No re-ingest needed: the
 // mapping is deterministic since all current content is the zeroindex.ai site.
