@@ -44,9 +44,11 @@ pnpm eval         # run golden Q/A through pipeline + LLM-as-judge
   first request, NOT module load — a top-level `env()` makes `next build` require
   runtime secrets and preview deploys fail. Keep DB access behind the lazy proxy
   (`src/lib/db.ts`, with `initSchema()`).
-- **libsql on Vercel needs the undici fetch workaround.** Vercel's fetch
-  instrumentation corrupts libsql's request ("expected non-null body source"); pass
-  `undici`'s `fetch` (decomposed to url+init). Don't replace it with the global fetch.
+- **libsql here does NOT need the undici fetch workaround.** Vercel's fetch
+  instrumentation corrupts libsql only during a Server Component *render*; ask queries
+  the DB exclusively inside the `/api/ask` route handler (never at render time), so the
+  plain `@libsql/client` in `src/lib/db.ts` is correct as-is. (Other ZeroIndex apps that
+  read libsql during SSR do need that workaround — this one doesn't.)
 - **Eval before changing retrieval/prompts/models.** `pnpm eval` is the quality
   contract — re-run it and record the headline metric before/after any change.
 - **Stale CSS after a `globals.css` edit** = Next 16 + Turbopack caching. `rm -rf
