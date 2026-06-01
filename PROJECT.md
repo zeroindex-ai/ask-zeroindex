@@ -1,5 +1,6 @@
 # ask-zeroindex — Project Documentation
 
+> **Phase:** Production
 > **Status: shipped** — live at `ask.zeroindex.ai`, embedded on `zeroindex.ai`. RAG pipeline + widget + LLM-as-judge eval harness; 90% pass rate on the 30-query golden set. Detailed retrieval ablation and the prompt-caching decision are in `eval-baselines.md`.
 
 This document captures the research, strategic decisions, architecture, implementation, testing approach, and integration plan for `ask-zeroindex`. It exists to:
