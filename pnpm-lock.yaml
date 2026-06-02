@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       '@anthropic-ai/sdk':
-        specifier: ^0.95.2
-        version: 0.95.2(zod@4.4.3)
+        specifier: ^0.100.1
+        version: 0.100.1(zod@4.4.3)
       '@libsql/client':
         specifier: ^0.17.3
         version: 0.17.3
@@ -57,7 +57,7 @@ importers:
         version: 4.1.7(vitest@4.1.7)
       '@zeroindex-ai/eval-pack':
         specifier: ^0.3.0
-        version: 0.3.0(@anthropic-ai/sdk@0.95.2(zod@4.4.3))
+        version: 0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.4.3))
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.7.0)
@@ -89,8 +89,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@anthropic-ai/sdk@0.95.2':
-    resolution: {integrity: sha512-Egddwo3sheo1PzUrMkZnH6VkQYwS0h/b/i8vSK8Ta9M45UQipAMeDFH57dYuDAfXMEUUGeKw6CMlremgMZgrSQ==}
+  '@anthropic-ai/sdk@0.100.1':
+    resolution: {integrity: sha512-RANcEe7LpiLczkKGOwoXOTuFdPhuubS0i4xaAKOMpcqc55YO0mukgxppV7eygx3DXNjxWT6RYOLPyOy0aIAmwg==}
     hasBin: true
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -179,6 +179,10 @@ packages:
 
   '@babel/runtime@7.29.2':
     resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.7':
+    resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.28.6':
@@ -2614,6 +2618,10 @@ packages:
     resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
     engines: {node: '>=12.0.0'}
 
+  tinyglobby@0.2.17:
+    resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
+    engines: {node: '>=12.0.0'}
+
   tinyrainbow@3.1.0:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
@@ -2890,7 +2898,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anthropic-ai/sdk@0.95.2(zod@4.4.3)':
+  '@anthropic-ai/sdk@0.100.1(zod@4.4.3)':
     dependencies:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
@@ -3001,6 +3009,8 @@ snapshots:
       '@babel/types': 7.29.7
 
   '@babel/runtime@7.29.2': {}
+
+  '@babel/runtime@7.29.7': {}
 
   '@babel/template@7.28.6':
     dependencies:
@@ -3843,11 +3853,11 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@zeroindex-ai/eval-pack@0.3.0(@anthropic-ai/sdk@0.95.2(zod@4.4.3))':
+  '@zeroindex-ai/eval-pack@0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.4.3))':
     dependencies:
       zod: 4.4.3
     optionalDependencies:
-      '@anthropic-ai/sdk': 0.95.2(zod@4.4.3)
+      '@anthropic-ai/sdk': 0.100.1(zod@4.4.3)
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -4905,7 +4915,7 @@ snapshots:
 
   json-schema-to-ts@3.1.1:
     dependencies:
-      '@babel/runtime': 7.29.2
+      '@babel/runtime': 7.29.7
       ts-algebra: 2.0.0
 
   json-schema-traverse@0.4.1: {}
@@ -5536,6 +5546,11 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
 
+  tinyglobby@0.2.17:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+
   tinyrainbow@3.1.0: {}
 
   tldts-core@7.0.30: {}
@@ -5678,7 +5693,7 @@ snapshots:
       picomatch: 4.0.4
       postcss: 8.5.15
       rolldown: 1.0.0-rc.17
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.9.1
       esbuild: 0.28.0
