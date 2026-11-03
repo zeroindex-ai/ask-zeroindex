@@ -21,7 +21,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.100.1
-        version: 0.100.1(zod@4.4.3)
+        version: 0.100.1(zod@4.6.6)
       '@libsql/client':
         specifier: ^0.17.3
         version: 0.17.3
@@ -38,8 +38,8 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
       zod:
-        specifier: ^4.4.3
-        version: 4.4.3
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -64,7 +64,7 @@ importers:
         version: 4.1.11(vitest@4.1.11)
       '@zeroindex-ai/eval-pack':
         specifier: ^0.3.0
-        version: 0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.4.3))
+        version: 0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.6.6))
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.7.0)
@@ -1724,6 +1724,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -3029,19 +3030,19 @@ packages:
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anthropic-ai/sdk@0.100.1(zod@4.4.3)':
+  '@anthropic-ai/sdk@0.100.1(zod@4.6.6)':
     dependencies:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
     optionalDependencies:
-      zod: 4.4.3
+      zod: 4.6.6
 
   '@asamuzakjp/css-color@5.1.11':
     dependencies:
@@ -3989,11 +3990,11 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@zeroindex-ai/eval-pack@0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.4.3))':
+  '@zeroindex-ai/eval-pack@0.3.0(@anthropic-ai/sdk@0.100.1(zod@4.6.6))':
     dependencies:
-      zod: 4.4.3
+      zod: 4.6.6
     optionalDependencies:
-      '@anthropic-ai/sdk': 0.100.1(zod@4.4.3)
+      '@anthropic-ai/sdk': 0.100.1(zod@4.6.6)
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -4587,8 +4588,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 9.39.4(jiti@2.7.0)
       hermes-parser: 0.25.1
-      zod: 4.4.3
-      zod-validation-error: 4.0.2(zod@4.4.3)
+      zod: 4.6.6
+      zod-validation-error: 4.0.2(zod@4.6.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -6007,8 +6008,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@4.0.2(zod@4.4.3):
+  zod-validation-error@4.0.2(zod@4.6.6):
     dependencies:
-      zod: 4.4.3
+      zod: 4.6.6
 
-  zod@4.4.3: {}
+  zod@4.6.6: {}
